@@ -8,7 +8,7 @@ div.field {
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
-  max-width: 500px;
+  max-width: 750px;
 }
 
 div.field label {
@@ -19,7 +19,7 @@ div.field label {
 
 input#url-input {
   width: 100%;
-  max-width: 500px;
+  max-width: 750px;
 }
 
 .tile {

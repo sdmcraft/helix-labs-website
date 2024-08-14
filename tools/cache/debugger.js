@@ -1,3 +1,5 @@
+/* eslint-disable no-plusplus */
+
 const API = 'https://helix3--helix-cache-debug-prod.adobeaem.workers.dev/';
 const input = document.querySelector('input#url-input');
 const button = document.querySelector('button#search-button');
@@ -147,8 +149,9 @@ const renderDetails = (data) => {
   const loc = new URL(window.location.href);
   if (loc.searchParams.has('url')) {
     input.value = loc.searchParams.get('url');
-    setTimeout(() => button.click(), 10);
+    setTimeout(() => button.click());
   }
+
   button.addEventListener('click', async () => {
     let url;
     try {
@@ -163,11 +166,18 @@ const renderDetails = (data) => {
     }
 
     try {
-      window.history.replaceState(null, '', `?url=${encodeURIComponent(url)}`);
+      loc.searchParams.set('url', url.toString());
+      window.history.replaceState({}, '', loc);
       button.disabled = true;
-      resultsContainer.innerHTML = '<div class="spinner">Loading...</div>';
 
+      let count = 0;
+      const interval = setInterval(() => {
+        if (++count > 3) count = 0;
+        resultsContainer.innerHTML = `<div class="spinner">Loading${'.'.repeat(count)}</div>`;
+      }, 250);
       const response = await fetchDetails(url);
+      clearInterval(interval);
+
       if (!response.ok) {
         resultsContainer.innerHTML = '<p class="error">Failed to fetch details</p>';
         console.error('Failed to fetch details');

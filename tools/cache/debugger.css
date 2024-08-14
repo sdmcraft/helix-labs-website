@@ -1,0 +1,74 @@
+div.form {
+  display: flex;
+  gap: 14px;
+}
+
+div.field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 750px;
+}
+
+div.field label {
+  font-size: 0.8em;
+  line-height: 1.2em;
+  font-weight: bold;
+}
+
+input#url-input {
+  width: 100%;
+  max-width: 750px;
+}
+
+.tile {
+  box-shadow: 3px 3px 4px rgba(0 0 0 10%);
+  border-radius: 8px;
+  margin: 12px 0;
+  padding: 12px 0;
+}
+
+div.row {
+  display: flex;
+}
+
+div.row span.key {
+  min-width: 200px;
+}
+
+div.row span.val.list {
+  margin: auto -4px;
+}
+
+div.row span.val.bad {
+  color: red;
+}
+
+.pill {
+  border-radius: 20px;
+    padding: 4px 8px;
+    margin: 0 4px;
+    font-size: 0.8em;
+    border: 1px solid #000;
+    white-space: nowrap;
+    line-height: 2.2;
+}
+
+.pill.good {
+  background-color: #0F0;
+  border: 1px solid #0F0;
+
+}
+
+.pill.bad {
+  background-color: #F00;
+  border: 1px solid #F00;
+
+}
+
+.pill.warn {
+  background-color: #FFA500;
+  border: 1px solid #FFA500;
+
+}

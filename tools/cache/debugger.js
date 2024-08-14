@@ -144,6 +144,11 @@ const renderDetails = (data) => {
 };
 
 (async () => {
+  const loc = new URL(window.location.href);
+  if (loc.searchParams.has('url')) {
+    input.value = loc.searchParams.get('url');
+    setTimeout(() => button.click(), 10);
+  }
   button.addEventListener('click', async () => {
     let url;
     try {
@@ -158,6 +163,7 @@ const renderDetails = (data) => {
     }
 
     try {
+      window.history.replaceState(null, '', `?url=${encodeURIComponent(url)}`);
       button.disabled = true;
       resultsContainer.innerHTML = '<div class="spinner">Loading...</div>';
 

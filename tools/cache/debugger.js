@@ -64,10 +64,9 @@ const tileTemplate = (
       </div>
       ${
   Object.entries(ENV_HEADERS[env]).map(([key, valKeys]) => {
-    if (typeof valKeys === 'string') {
-      // eslint-disable-next-line no-param-reassign
-      valKeys = [valKeys];
-    }
+    // eslint-disable-next-line no-param-reassign
+    valKeys = typeof valKeys === 'string' ? [valKeys] : [...valKeys];
+
     let valCls = '';
     let val = '';
     while (!val && valKeys.length) {
@@ -101,10 +100,11 @@ const renderDetails = (data) => {
   const {
     x_push_invalidation: pushInval = 'disabled',
     x_byo_cdn_type: byoCdnType = 'unknown',
+    x_forwarded_host: forwardedHost = '',
   } = data.probe.req.headers;
   const pushInvalPill = pushInval === 'enabled'
-    ? '<span class="pill good">enabled</span>'
-    : '<span class="pill bad">disabled</span>';
+    ? '<span class="pill badge good">enabled</span>'
+    : '<span class="pill badge bad">disabled</span>';
   const actualCdn = inferCDNType(data);
   const cdnMatchClass = actualCdn === byoCdnType ? 'good' : 'bad';
 
@@ -118,11 +118,15 @@ const renderDetails = (data) => {
       </div>
       <div class="row">
         <span class="key">BYOCDN Type</span>
-        <span class="val"><span class="pill ${cdnMatchClass}">${byoCdnType}</span></span>
+        <span class="val"><span class="pill badge ${cdnMatchClass}">${byoCdnType}</span></span>
       </div>
       <div class="row">
         <span class="key">Actual CDN Type</span>
-        <span class="val"><span class="pill ${cdnMatchClass}">${actualCdn}</span></span>
+        <span class="val"><span class="pill badge ${cdnMatchClass}">${actualCdn}</span></span>
+      </div>
+      <div class="row">
+        <span class="key">Forwarded Host</span>
+        <span class="val">${forwardedHost}</span>
       </div>
     </div>
   `;
@@ -146,6 +150,8 @@ const renderDetails = (data) => {
 };
 
 (async () => {
+  // renderDetails(stub);
+
   const loc = new URL(window.location.href);
   if (loc.searchParams.has('url')) {
     input.value = loc.searchParams.get('url');

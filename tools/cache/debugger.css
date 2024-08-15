@@ -23,7 +23,7 @@ input#url-input {
 }
 
 .tile {
-  box-shadow: 3px 3px 4px rgba(0 0 0 10%);
+  box-shadow: 3px 3px 4px rgba(0 0 0 0.1);
   border-radius: 8px;
   margin: 12px 0;
   padding: 12px 0;
@@ -47,12 +47,16 @@ div.row span.val.bad {
 
 .pill {
   border-radius: 20px;
-    padding: 4px 8px;
-    margin: 0 4px;
-    font-size: 0.8em;
-    border: 1px solid #000;
-    white-space: nowrap;
-    line-height: 2.2;
+  padding: 4px 8px;
+  margin: 0 4px;
+  font-size: 0.8em;
+  border: 1px solid #000;
+  white-space: nowrap;
+  line-height: 2.2;
+}
+
+.pill.badge {
+  margin-left: -2px;
 }
 
 .pill.good {
@@ -70,5 +74,4 @@ div.row span.val.bad {
 .pill.warn {
   background-color: #FFA500;
   border: 1px solid #FFA500;
-
 }

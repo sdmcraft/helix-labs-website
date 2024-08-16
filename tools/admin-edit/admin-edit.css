@@ -1,0 +1,16 @@
+input {
+    width: 100%;
+}
+
+textarea {
+    width: 100%;
+}
+
+.url-bar {
+    display: flex;
+    margin: 16px 0;
+}
+
+body {
+    padding: 16px;
+}

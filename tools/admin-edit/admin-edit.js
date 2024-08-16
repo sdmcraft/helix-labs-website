@@ -3,12 +3,19 @@ const saveButton = document.getElementById('save');
 const adminURL = document.getElementById('admin-url');
 const textarea = document.getElementById('textarea');
 const method = document.getElementById('method');
+const console = document.getElementById('console');
+
+function consoleLog(message) {
+    console.value += `${message}\n`;
+    console.scrollTop = console.scrollHeight;
+}
 
 fetchButton.addEventListener('click', async () => {
     localStorage.setItem('admin-url', adminURL.value);
     const resp = await fetch(adminURL.value);
     const text = await resp.text();
     textarea.value = text;
+    consoleLog(`${resp.status} GET ${adminURL.value} ${resp.headers.get('x-error')}`);
 });
 
 saveButton.addEventListener('click', async () => {
@@ -21,7 +28,7 @@ saveButton.addEventListener('click', async () => {
         }
     });
     const text = await resp.text();
-    console.log(text);
+    consoleLog(`${resp.status} ${method.value} ${adminURL.value} ${resp.headers.get('x-error')}`);
 });
 
 adminURL.value = localStorage.getItem('admin-url')||'';

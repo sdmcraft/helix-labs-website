@@ -4,6 +4,9 @@ input {
 
 textarea {
     width: 100%;
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: scroll;
 }
 
 .url-bar {
@@ -13,4 +16,8 @@ textarea {
 
 body {
     padding: 16px;
+}
+
+#console {
+    border: 0;
 }

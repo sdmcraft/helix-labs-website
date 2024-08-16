@@ -15,7 +15,7 @@ fetchButton.addEventListener('click', async () => {
     const resp = await fetch(adminURL.value);
     const text = await resp.text();
     textarea.value = text;
-    consoleLog(`${resp.status} GET ${adminURL.value} ${resp.headers.get('x-error')}`);
+    consoleLog(`${resp.status} GET ${adminURL.value} ${resp.headers.get('x-error') || ''}`);
 });
 
 saveButton.addEventListener('click', async () => {
@@ -28,7 +28,7 @@ saveButton.addEventListener('click', async () => {
         }
     });
     const text = await resp.text();
-    consoleLog(`${resp.status} ${method.value} ${adminURL.value} ${resp.headers.get('x-error')}`);
+    consoleLog(`${resp.status} ${method.value} ${adminURL.value} ${resp.headers.get('x-error') || ''}`);
 });
 
 adminURL.value = localStorage.getItem('admin-url')||'https://admin.hlx.page/status/adobe/aem-boilerplate/main/';

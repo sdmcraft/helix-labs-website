@@ -1,6 +1,6 @@
 /* eslint-disable no-plusplus */
 
-const API = 'https://helix3--helix-cache-debug-prod.adobeaem.workers.dev/';
+const API = 'https://helix-cache-debug.adobeaem.workers.dev/';
 const input = document.querySelector('input#url-input');
 const button = document.querySelector('button#search-button');
 const resultsContainer = document.querySelector('div#results');

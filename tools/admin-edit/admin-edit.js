@@ -31,4 +31,4 @@ saveButton.addEventListener('click', async () => {
     consoleLog(`${resp.status} ${method.value} ${adminURL.value} ${resp.headers.get('x-error')}`);
 });
 
-adminURL.value = localStorage.getItem('admin-url')||'';
+adminURL.value = localStorage.getItem('admin-url')||'https://admin.hlx.page/status/adobe/aem-boilerplate/main/';

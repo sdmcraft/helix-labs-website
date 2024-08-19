@@ -95,7 +95,7 @@ const tileTemplate = (
   `;
 
 const renderDetails = (data) => {
-  console.log(data);
+  // console.log(data);
 
   const {
     x_push_invalidation: pushInval = 'disabled',
@@ -186,7 +186,7 @@ const renderDetails = (data) => {
 
       if (!response.ok) {
         resultsContainer.innerHTML = '<p class="error">Failed to fetch details</p>';
-        console.error('Failed to fetch details');
+        // console.error('Failed to fetch details');
         return;
       }
       const data = await response.json();

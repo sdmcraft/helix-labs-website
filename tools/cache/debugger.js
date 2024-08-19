@@ -166,7 +166,7 @@ const renderDetails = (data) => {
       try {
         url = new URL(`https://${input.value}`);
       } catch {
-        alert('Invalid URL');
+        // alert('Invalid URL');
         return;
       }
     }

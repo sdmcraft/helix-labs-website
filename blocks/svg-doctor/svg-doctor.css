@@ -172,7 +172,6 @@
   border-radius: var(--rounding-s);
   padding: .2rem .5rem;
   background-color: transparent;
-  /* font-size: var(--type-detail-m-size); */
   cursor: pointer;
   transition: background-color .3s;
 }

@@ -119,9 +119,6 @@ main {
 main[data-canvas] {
   position: relative;
   padding-bottom: 0;
-  /* margin-bottom: 0; */
-  /* padding-right: 200px; */
-  /* transition: max-width 0.3s; */
 }
 
 main > .canvas {

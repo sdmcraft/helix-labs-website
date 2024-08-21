@@ -1,4 +1,5 @@
 import ImportService from './importservice.js';
+import { sampleRUM } from '../../scripts/aem.js';
 
 const form = document.querySelector('.form');
 const resultsContainer = document.querySelector('div#results');
@@ -200,3 +201,5 @@ function addJobsList(jobs) {
     }
   });
 })();
+
+sampleRUM.enhance();

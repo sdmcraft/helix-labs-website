@@ -1,5 +1,7 @@
 /* eslint-disable no-plusplus */
 
+import { sampleRUM } from '../../scripts/aem.js';
+
 const API = 'https://helix-cache-debug.adobeaem.workers.dev/';
 const input = document.querySelector('input#url-input');
 const button = document.querySelector('button#search-button');
@@ -195,4 +197,5 @@ const renderDetails = (data) => {
       button.disabled = false;
     }
   });
+  sampleRUM.enhance();
 })();

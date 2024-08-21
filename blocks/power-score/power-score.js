@@ -113,7 +113,7 @@ export default async function decorate(block) {
           forms: integrationData.forms,
         });
         calc.innerHTML = `
-          <p>View in <a target="_blank" href="/calculator#${params.toString()}">calculator</a></p>
+          <p>View in <a target="_blank" href="/tools/powerscore/calculator#${params.toString()}">calculator</a></p>
         `;
       }
     });

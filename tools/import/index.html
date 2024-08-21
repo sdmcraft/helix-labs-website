@@ -17,10 +17,10 @@
         <h1>Bulk Import</h1>
         <p>Perform bulk imports using your existing import scripts. <a href="https://www.aem.live/developer/importer" target="_blank">Learn more</a> about importing content.</p>
         <div>
-            <div class="form">
+            <form class="form">
                 <div class="field">
                     <label for="apiKey-input">API Key</label>
-                    <input id="apiKey-input" type="text"/>
+                    <input id="apiKey-input" type="password" autocomplete="apiKey"/>
                 </div>
                 <div class="field">
                     <label for="url-input">URLs</label>
@@ -51,11 +51,12 @@
                     </div>
                 </div>
                 <button id="start-button" class="button">Start</button>
-            </div>
+            </form>
             <div>
                 <div class="job-details hidden">
                     <div class="heading">
                         <h2>Job Details</h2>
+                        <span class="job-list"></span>
                         <a id="clear-button">Clear history</a>
                     </div>
                     <div id="results"></div>

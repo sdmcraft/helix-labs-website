@@ -1,0 +1,125 @@
+.import p.small {
+  font-size: var(--font-size-50);
+}
+
+.import .form .field {
+  margin-bottom: var(--spacing-400);
+}
+
+.import .form .field label {
+  font-weight: bold;
+}
+
+.import .form .field .field-group {
+  width: 100%;
+  border: var(--border-m) solid var(--gray-300);
+  border-radius: var(--rounding-m);
+  padding: 0.85em;
+  color: var(--color-text);
+}
+
+.import .form .field .field-group div {
+  margin-bottom: var(--spacing-200);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.import .form .field .field-group div:last-child {
+  margin-bottom: 0;
+}
+
+.import .form .field .field-group div label {
+  width: 160px;
+  font-size: var(--body-size-s);
+  margin: unset;
+}
+
+.import .form .field textarea {
+  resize: vertical;
+  min-height: 200px;
+}
+
+.import .form .field input[type="file"] {
+  position: relative;
+  inset: unset;
+  appearance: unset;
+  opacity: unset;
+  outline: none;
+}
+
+.import .form .field input[type="file"] ~ span {
+  margin-left: var(--spacing-100);
+}
+
+.import .form .field input[type="checkbox"] {
+  width: unset;
+}
+
+.import .form + div > div:has(#results) {
+  margin-top: var(--spacing-m);
+  border-top: var(--border-m) solid var(--gray-300);
+}
+
+.import .heading {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 1em 0 0.5em;
+  gap: var(--spacing-xs);
+}
+
+.import .heading h2 {
+  margin: 0;
+}
+
+.import .heading a {
+  font-size: var(--body-size-xs);
+  cursor: pointer;
+}
+
+#results {
+ padding-top: var(--spacing-s);
+}
+
+.import div.hidden {
+  display: none;
+}
+
+#results table {
+  display: grid;
+  min-width: 100%;
+  grid-template-columns: auto minmax(150px, 1.67fr);
+  border-collapse: separate;
+  border: var(--border-s) solid var(--gray-300);
+  border-radius: var(--rounding-m);
+  border-spacing: 0;
+  overflow: hidden;
+}
+
+#results thead,
+#results tbody,
+#results tr {
+  display: contents;
+}
+
+#results table td {
+  padding: var(--spacing-200);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#results table td:first-child {
+  font-weight: bold;
+  background-color: var(--gray-400);
+}
+
+#results table tr:nth-child(odd) td:last-child {
+  background-color: var(--gray-100);
+}
+
+#results table tr:nth-child(even) td:last-child {
+  background-color: var(--gray-25);
+}
+

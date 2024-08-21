@@ -6,6 +6,11 @@ main .data-element {
     padding: 1rem;
     flex: 1;
 
+    .icon > svg {
+        width: auto;
+        height: 100px;
+    }
+    
     h3 {
         font-size: var(--heading-font-size-xxs);
         position: absolute;

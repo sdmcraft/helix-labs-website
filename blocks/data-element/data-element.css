@@ -11,6 +11,11 @@ main .data-element {
         height: 100px;
     }
 
+    .integration-icon svg, .integration-icon img {
+        width: 32px;
+        height: 32px;
+    }
+    
     h3 {
         font-size: var(--heading-font-size-xxs);
         position: absolute;

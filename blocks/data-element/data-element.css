@@ -34,7 +34,8 @@ main .data-element {
             margin: 0;
             font-size: var(--body-font-size-s);
             text-align: center;
-            text-wrap: nowrap;
+            
+            /* text-wrap: nowrap; */
         }
 
         input, select {

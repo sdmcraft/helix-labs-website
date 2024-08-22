@@ -236,7 +236,7 @@ function createPin(city, width, height, longUnit, latUnit, hash, error = false) 
   pin.setAttribute('cy', ((height / 2) - (parseFloat(city.Latitude, 10) * latUnit)).toFixed(2));
   const PIN_RADIUS = 33;
   pin.setAttribute('r', PIN_RADIUS);
-  pin.setAttribute('aria-label', `${city.City}${city.Code ? ` (${city.Code})` : ''}${hash ? ` - ${hash}` : ''}`);
+  pin.setAttribute('aria-label', `${city.City}${city.Code ? ` (${city.Code})` : ''}${hash ? ` ${hash}` : ''}`);
   if (error) {
     pin.classList.add('error');
   }

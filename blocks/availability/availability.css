@@ -15,6 +15,15 @@
   max-width: calc(100% - 6vw);
 }
 
+.availability .tooltip-wrapper > div {
+  white-space: wrap;
+  max-width: 316px;
+  line-height: 1.2em;
+  text-align: center;
+  pointer-events: none;
+
+}
+
 @media (width >= 900px) {
   .availability .tooltip-wrapper {
     max-width: calc(100% - 6rem);

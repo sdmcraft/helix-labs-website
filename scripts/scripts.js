@@ -153,7 +153,9 @@ export function decorateMain(main) {
 
 async function loadThemeStyles() {
   const theme = getMetadata('theme');
-  if (theme === 'powerscore') loadCSS(`${window.hlx.codeBasePath}/styles/powerscore-styles.css`);
+  if (theme === 'powerscore') {
+    await loadCSS(`${window.hlx.codeBasePath}/styles/powerscore-styles.css`);
+  }
 }
 
 /**

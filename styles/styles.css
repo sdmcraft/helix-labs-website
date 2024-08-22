@@ -135,7 +135,7 @@ main[data-canvas] > .canvas {
 @media (width >= 1200px) {
   main[data-canvas] {
     max-width: calc(100vw - (2 * var(--horizontal-spacing)));
-    min-height: calc(100dvh - (2 * var(--header-height)));
+    min-height: calc(100dvh - (2.2 * var(--header-height)));
     padding-right: calc(100vw - 340px - (2 * var(--horizontal-spacing)));
     padding-bottom: var(--horizontal-spacing);
   }
@@ -260,6 +260,7 @@ i.symbol {
   width: 1em;
   height: 1em;
   vertical-align: middle;
+  transform: translateY(-0.05em);
 }
 
 i.symbol::before,

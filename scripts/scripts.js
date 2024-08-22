@@ -11,6 +11,7 @@ import {
   loadSections,
   loadCSS,
   sampleRUM,
+  getMetadata,
 } from './aem.js';
 
 /**
@@ -150,6 +151,13 @@ export function decorateMain(main) {
   decorateButtons(main);
 }
 
+async function loadThemeStyles() {
+  const theme = getMetadata('theme');
+  if (theme === 'powerscore') {
+    await loadCSS(`${window.hlx.codeBasePath}/styles/powerscore-styles.css`);
+  }
+}
+
 /**
  * Loads everything needed to get to LCP.
  * @param {Element} doc The container element
@@ -157,6 +165,8 @@ export function decorateMain(main) {
 async function loadEager(doc) {
   document.documentElement.lang = 'en';
   decorateTemplateAndTheme();
+  loadThemeStyles();
+
   const main = doc.querySelector('main');
   if (main) {
     decorateMain(main);

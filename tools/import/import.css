@@ -130,7 +130,7 @@
   margin: 6px 0 0 1rem;
   border: 3px solid rgb(0 0 0 / 30%);
   border-radius: 50%;
-  border-top-color: #ccf;
+  border-top-color: var(--cyan-700);
   animation: spin 1s ease-in-out infinite;
 }
 

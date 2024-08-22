@@ -62,7 +62,7 @@ export default class ImportService {
     const $this = this;
 
     const poll = async () => {
-      if ($this.busy || !$this.apiKey) {
+      if ($this.busy) {
         return;
       }
       const { id: jobId } = $this.job;
@@ -85,7 +85,7 @@ export default class ImportService {
       this.importInterval = undefined;
     }
 
-    if (this.config.poll) {
+    if (this.config.poll || !$this.apiKey) {
       await poll();
       if (!this.importInterval && this.job?.status === 'RUNNING') {
         // start polling

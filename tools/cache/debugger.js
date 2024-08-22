@@ -1,8 +1,9 @@
-/* eslint-disable no-plusplus */
-
 const API = 'https://helix-cache-debug.adobeaem.workers.dev/';
+/** @type {HTMLInputElement} */
 const input = document.querySelector('input#url-input');
+/** @type {HTMLButtonElement} */
 const button = document.querySelector('button#search-button');
+/** @type {HTMLDivElement} */
 const resultsContainer = document.querySelector('div#results');
 
 const ENV_HEADERS = {
@@ -48,9 +49,27 @@ const inferCDNType = (data) => {
   return 'cloudflare';
 };
 
+/**
+ * @param {import('./types.js').POP[]} pops
+ * @param {'fastly'|'cloudflare'} type
+ */
+const popsTemplate = (pops, type) => {
+  import('./pops-map.js');
+  return /* html */`\
+    <details>
+      <summary>POP Details</summary>
+      <div class="pops">
+        <pops-map data-cdn-type="${type}" data-pops="${encodeURIComponent(JSON.stringify(pops))}"></pop-map>
+      </div>
+    </details>
+  `;
+};
+
 const tileTemplate = (
   env,
-  { headers, status, url },
+  {
+    headers, status, url, pops,
+  },
   {
     contentLengthMatches,
     lastModMatches,
@@ -91,6 +110,7 @@ const tileTemplate = (
         <span class="val ${valCls}">${val}</span>
       </div>`;
   }).join('\n')}
+    ${pops ? popsTemplate(pops, 'fastly') : ''}
     </div>
   `;
 
@@ -150,8 +170,6 @@ const renderDetails = (data) => {
 };
 
 (async () => {
-  // renderDetails(stub);
-
   const loc = new URL(window.location.href);
   if (loc.searchParams.has('url')) {
     input.value = loc.searchParams.get('url');
@@ -166,7 +184,8 @@ const renderDetails = (data) => {
       try {
         url = new URL(`https://${input.value}`);
       } catch {
-        // alert('Invalid URL');
+        input.setCustomValidity('Invalid URL');
+        input.reportValidity();
         return;
       }
     }
@@ -178,6 +197,7 @@ const renderDetails = (data) => {
 
       let count = 0;
       const interval = setInterval(() => {
+        // eslint-disable-next-line no-plusplus
         if (++count > 3) count = 0;
         resultsContainer.innerHTML = `<div class="spinner">Loading${'.'.repeat(count)}</div>`;
       }, 250);
@@ -186,7 +206,6 @@ const renderDetails = (data) => {
 
       if (!response.ok) {
         resultsContainer.innerHTML = '<p class="error">Failed to fetch details</p>';
-        // console.error('Failed to fetch details');
         return;
       }
       const data = await response.json();

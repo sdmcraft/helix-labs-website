@@ -35,12 +35,24 @@ function formatDuration(durationMs) {
   const hours = Math.floor((durationMs / (1000 * 60 * 60)) % 24);
   const days = Math.floor(durationMs / (1000 * 60 * 60 * 24));
 
+  if (days === 0 && hours === 0) {
+    return `${minutes}m ${seconds}s`;
+  }
+  if (days === 0) {
+    return `${hours}h ${minutes}m ${seconds}s`;
+  }
+
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
 function createJobTable(job) {
   const table = document.createElement('table');
   const tbody = document.createElement('tbody');
+
+  // Ensure a 'duration' value exists for all jobs, including RUNNING.
+  if (!job.duration) {
+    job.duration = Date.now() - (new Date(job.startTime).getTime());
+  }
 
   Object.entries(job).forEach(([key, value]) => {
     const tr = document.createElement('tr');
@@ -53,6 +65,8 @@ function createJobTable(job) {
       formattedValue = formatDate(value);
     } else if (key === 'duration') {
       formattedValue = formatDuration(value);
+    } else if (key === 'status' && value === 'RUNNING') {
+      formattedValue += '<div class="spinner"></div>';
     } else if (key === 'options') {
       formattedValue = Object.entries(value)
         .filter(([, optionValue]) => optionValue)
@@ -98,7 +112,7 @@ function getImportScript(input) {
       };
       reader.readAsArrayBuffer(file);
     } else {
-      reject(new Error('No file selected'));
+      resolve('');
     }
   });
 }

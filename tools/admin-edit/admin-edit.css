@@ -1,4 +1,4 @@
-.admin-edit [aria-hidden] {
+.admin-edit [aria-hidden='true'] {
   display: none;
 }
 

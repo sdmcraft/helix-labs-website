@@ -1,3 +1,14 @@
+:root {
+  --color-white: #fff;
+  --bg-color-grey-2: #d6d6d6;
+  --color-success: #0d9f54;
+  --color-success-highlight: #2dd17c;
+  --color-error: #f31616;
+  --color-error-highlight: #fc0909;
+  --overlay-curtain-bg-color: rgb(0 0 0 / 60%);
+  --overlay-curtain-bg-filter: blur(0.05em);
+}
+
 div.form {
   display: flex;
   gap: 14px;

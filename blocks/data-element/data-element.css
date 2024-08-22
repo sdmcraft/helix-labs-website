@@ -1,21 +1,9 @@
-@import url('../../styles/powerscore-styles.css');
-
 main .data-element {
     border: 1px solid var(--light-color);
     position: relative;
     padding: 1rem;
     flex: 1;
 
-    .icon > svg, .icon > img {
-        width: auto;
-        height: 100px;
-    }
-
-    .integration-icon svg, .integration-icon img {
-        width: 32px;
-        height: 32px;
-    }
-    
     h3 {
         font-size: var(--heading-font-size-xxs);
         position: absolute;
@@ -44,11 +32,11 @@ main .data-element {
             margin: 0;
             font-size: var(--body-font-size-s);
             text-align: center;
-            
-            /* text-wrap: nowrap; */
+            text-wrap: nowrap;
         }
 
         input, select {
+            width: auto;
             padding: 0 8px;
             margin: 4px 8px;
             height: 32px;
@@ -197,7 +185,7 @@ main .data-element {
     }
 
     &[data-metric="cdn"] {
-        .icon {
+        .icon svg, .icon img {
             width: auto;
             height: 100px;
         }

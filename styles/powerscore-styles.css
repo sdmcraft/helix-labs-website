@@ -9,46 +9,8 @@
     --success-color: rgb(0 136 0);
     --improve-color: rgb(255 170 51);
     --error-color: rgb(217 48 37);
-  
-    /* fonts */
-    --body-font-family: nunito, sans-serif;
-    --heading-font-family: var(--body-font-family);
-    --fixed-font-family: 'Roboto Mono', menlo, consolas, 'Liberation Mono', monospace;
-  
-    /* body sizes */
-    --body-font-size-m: 22px;
-    --body-font-size-s: 18px;
-    --body-font-size-xs: 16px;
-  
-    /* heading sizes */
-    --heading-font-size-xxl: 48px;
-    --heading-font-size-xl: 40px;
-    --heading-font-size-l: 32px;
-    --heading-font-size-m: 24px;
-    --heading-font-size-s: 20px;
-    --heading-font-size-xs: 18px;
-  
-    /* nav height */
-    --nav-height: 64px;
   }
-  
-  @font-face {
-    font-family: roboto-fallback;
-    size-adjust: 100.06%;
-    ascent-override: 95%;
-    src: local('Arial');
-  }
-  
-  @media (width >= 900px) {
-    :root {
-      --heading-font-size-xxl: 60px;
-      --heading-font-size-xl: 48px;
-      --heading-font-size-l: 36px;
-      --heading-font-size-m: 30px;
-      --heading-font-size-s: 24px;
-      --heading-font-size-xs: 22px;
-    }
-  }  
+
 
 /* buttons */
 a.button:any-link,
@@ -91,4 +53,8 @@ button.secondary {
   background-color: unset;
   border: 2px solid currentcolor;
   color: var(--text-color)
+}
+
+.icon {
+  font-size: 24px;
 }

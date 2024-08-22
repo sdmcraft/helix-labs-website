@@ -62,7 +62,7 @@ export default class ImportService {
     const $this = this;
 
     const poll = async () => {
-      if ($this.busy) {
+      if ($this.busy || !$this.apiKey) {
         return;
       }
       const { id: jobId } = $this.job;
@@ -122,11 +122,12 @@ export default class ImportService {
     if (!this.apiKey) {
       throw new Error('API key is required');
     }
+    const body = importScript ? { urls, options, importScript } : { urls, options };
     try {
       const resp = await fetch(`${this.endpoint}${IMPORT_JOBS_PATH}`, {
         method: 'POST',
         headers: this.#getAuthHeaders(),
-        body: JSON.stringify({ urls, options, importScript }),
+        body: JSON.stringify(body),
       });
       if (resp.ok) {
         this.job = await resp.json();

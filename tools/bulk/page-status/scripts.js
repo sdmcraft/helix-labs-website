@@ -1,7 +1,7 @@
 import { div } from '../../../scripts/dom-helpers.js';
 
 const GITHUB_REGEX = /https:\/\/github.com\/([^/]+)\/([^/]+)/;
-const SITE_REGEX = /https:\/\/.*--(.*)--(.*?)\.[^\/]+(\/?.*)/;
+const SITE_REGEX = /https:\/\/.*--(.*)--(.*?)\.[^/]+(\/?.*)/;
 
 const OPTIONS = {
   method: 'POST',
@@ -13,10 +13,10 @@ const OPTIONS = {
   },
   redirect: 'follow',
   referrerPolicy: 'no-referrer',
-}
+};
 
 function parseUrl(url) {
-  let match = url.match(GITHUB_REGEX)
+  let match = url.match(GITHUB_REGEX);
   if (match) {
     return {
       owner: match[1],
@@ -30,14 +30,19 @@ function parseUrl(url) {
       repo: match[1],
       owner: match[2],
       path: match[3] || '/*',
-    }
+    };
   }
-  return { };
-};
+  return {};
+}
+
+function showLoading() {
+  document.querySelector('.page-status-results .loading').setAttribute('aria-hidden', 'false');
+}
 
 async function populateResults(url) {
   const resp = await fetch(`${url}/details`, { mode: 'cors' });
   if (!resp.ok) {
+    /* eslint-disable no-console */
     console.log('Unable to fetch job details.');
     return;
   }
@@ -56,11 +61,12 @@ async function populateResults(url) {
   results.setAttribute('aria-hidden', 'false');
 }
 
-
 async function checkJob(url) {
-  const resp = await fetch(url, {  mode: 'cors' });
+  const resp = await fetch(url, { mode: 'cors' });
   if (!resp.ok) {
-   console.log('Unable to check status of job, terminating checks.')
+    /* eslint-disable no-console */
+    console.log('Unable to check status of job, terminating checks.');
+    return;
   }
   const status = await resp.json();
   if (status.state !== 'completed' && status.state !== 'stopped') {
@@ -73,20 +79,23 @@ async function checkJob(url) {
 async function startJob(owner, repo, path) {
   showLoading();
   if (path.endsWith('/')) {
+    /* eslint-disable no-param-reassign */
     path = `${path}*`;
   }
 
   const opts = {
     body: JSON.stringify({ paths: [path] }),
     ...OPTIONS,
-  }
-  const resp = await fetch(`https://admin.hlx.page/status/${owner}/${repo}/main/*`, opts)
+  };
+  const resp = await fetch(`https://admin.hlx.page/status/${owner}/${repo}/main/*`, opts);
   if (!resp.ok) {
+    /* eslint-disable no-console */
     console.log('Error starting job.', resp.status, resp.statusText);
     return;
   }
   const data = await resp.json();
   if (data.job.state !== 'created') {
+    /* eslint-disable no-console */
     console.log(`Error starting job, check at: ${data.links.self}`);
     return;
   }
@@ -99,10 +108,6 @@ async function startJob(owner, repo, path) {
   setTimeout(() => checkJob(data.links.self), 2000);
 }
 
-function showLoading() {
-  document.querySelector('.page-status-results .loading').setAttribute('aria-hidden', 'false');
-}
-
 function submit(e) {
   e.preventDefault();
   const btn = document.querySelector('form button[type="submit"]');
@@ -112,7 +117,8 @@ function submit(e) {
   const url = document.querySelector('form input[type="url"]').value;
   const { owner, repo, path } = parseUrl(url);
   if (!owner || !repo) {
-    console.error('Invalid URL'); // TODO: Show error message
+    /* eslint-disable no-console */
+    console.error('Invalid URL'); // TODO: Show error message?
     btn.removeAttribute('disabled');
     return;
   }
@@ -143,7 +149,7 @@ function init() {
   const repo = params.get('repo');
   const path = params.get('path');
   if (job && owner && repo && path) {
-    showLoading()
+    showLoading();
     document.querySelector('form button[type="submit"]').setAttribute('disabled', 'disabled');
     document.querySelector('form input[type="url"]').value = `https://main--${repo}--${owner}.aem.page${path || ''}`;
     checkJob(`https://admin.hlx.page/job/${owner}/${repo}/main/status/${job}`);

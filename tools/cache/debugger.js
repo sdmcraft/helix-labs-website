@@ -1,3 +1,5 @@
+import { sampleRUM } from '../../scripts/aem.js';
+
 const API = 'https://helix-cache-debug.adobeaem.workers.dev/';
 /** @type {HTMLInputElement} */
 const input = document.querySelector('input#url-input');
@@ -214,4 +216,5 @@ const renderDetails = (data) => {
       button.disabled = false;
     }
   });
+  sampleRUM.enhance();
 })();

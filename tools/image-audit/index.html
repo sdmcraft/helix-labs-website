@@ -35,16 +35,64 @@
         <span id="images-counter">0</span> images found on <span id="pages-counter">0</span> (out of <span id="total-counter">0</span>) pages in <span id="elapsed">0</span> s.
       </p>
       <p class="button-wrapper">
-        <button type="button" class="button" disabled>Download Audit Report</button>
+        <button type="button" class="button" id="download-report" disabled>Download Audit Report</button>
       </p>
     </div>
     <div class="canvas" id="canvas">
       <div class="action-bar">
         <form>
-          <div role="listbox" class="form-field button-field">
+          <div class="form-field radio-field">
             <p>Sort by:</p>
-            <button type="button" role="option" aria-current="false" class="button ghost" id="sort-count">Appearances</button>
-            <button type="button" role="option" aria-current="false" class="button ghost" id="sort-aspect">Aspect ratio</button>
+            <ul>
+              <li>
+                <label>
+                  <input type="radio" name="sort" value="count" id="sort-count" data-order="-1">
+                  <span>Appearances</span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="radio" name="sort" value="aspect" id="sort-aspect" data-order="-1">
+                  <span>Aspect Ratio</span>
+                </label>
+              </li>
+            </ul>
+          </div>
+      
+          <div class="form-field checkbox-field">
+            <p>Filter by:</p>
+            <ul>
+              <li>
+                <label>
+                  <input type="checkbox" name="filter" value="missing-alt" id="filter-missing-alt">
+                  <span>Missing Alt Text</span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="checkbox" name="filter" value="square" aria-label="Square aspect ratio" id="filter-square">
+                  <span><i class="symbol symbol-square"></i></span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="checkbox" name="filter" value="portrait" aria-label="Portrait aspect ratio" id="filter-portrait">
+                  <span><i class="symbol symbol-portrait"></i></span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="checkbox" name="filter" value="landscape" aria-label="Landscape aspect ratio" id="filter-landscape">
+                  <span><i class="symbol symbol-landscape"></i></span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="checkbox" name="filter" value="widescreen" aria-label="Widescreen aspect ratio" id="filter-widescreen">
+                  <span><i class="symbol symbol-widescreen"></i></span>
+                </label>
+              </li>
+            </ul>
           </div>
         </form>
       </div>

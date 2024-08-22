@@ -2,118 +2,58 @@
 import { buildModal } from '../../scripts/scripts.js';
 import { decorateIcons } from '../../scripts/aem.js';
 
-// utility functions
-function getFormData(form) {
-  const data = {};
-  [...form.elements].forEach((field) => {
-    const { name, type, value } = field;
-    if (name && type && value) {
-      switch (type) {
-        case 'number':
-        case 'range':
-          data[name] = parseFloat(value, 10);
-          break;
-        case 'date':
-        case 'datetime-local':
-          data[name] = new Date(value);
-          break;
-        case 'checkbox':
-          if (field.checked) {
-            if (data[name]) data[name].push(value);
-            else data[name] = [value];
-          }
-          break;
-        case 'radio':
-          if (field.checked) data[name] = value;
-          break;
-        case 'url':
-          data[name] = new URL(value);
-          break;
-        case 'file':
-          data[name] = field.files;
-          break;
-        default:
-          data[name] = value;
-      }
+/* reporting utilities */
+/**
+ * Generates sorted array of audit report rows.
+ * @returns {Object[]} Sorted array of report rows.
+ */
+function writeReportRows() {
+  const unique = window.audit;
+  const entries = [];
+  unique.forEach((image) => {
+    if (image && image.site) {
+      image.site.forEach((site, i) => {
+        entries.push({
+          Site: site,
+          'Image Source': new URL(image.src, image.origin).href,
+          'Alt Text': image.alt[i],
+        });
+      });
     }
   });
-  return data;
+  // sort the entries array alphabetically by the 'Site' property
+  const sorted = entries.sort((a, b) => a.Site.localeCompare(b.Site));
+  return sorted;
 }
-
-function extractUrlType(url) {
-  const { hostname, pathname } = new URL(url);
-  const aemHosts = ['hlx.page', 'hlx.live', 'aem.page', 'aem.live'];
-  const aemSite = aemHosts.find((h) => hostname.endsWith(h));
-  if (pathname.endsWith('.xml')) return 'sitemap';
-  if (pathname.includes('robots.txt')) return 'robots';
-  if (aemSite || hostname.includes('github')) {
-    return 'write sitemap';
-  }
-  return false;
-}
-
-function writeSitemapUrl(url) {
-  const { hostname, pathname } = new URL(url);
-  const aemHosts = ['hlx.page', 'hlx.live', 'aem.page', 'aem.live'];
-  const aemSite = aemHosts.find((h) => hostname.endsWith(h));
-  if (aemSite) {
-    const [ref, repo, owner] = hostname.replace(`.${aemSite}`, '').split('--');
-    return `https://${ref}--${repo}--${owner}.${aemSite.split('.')[0]}.live/sitemap.xml`;
-  }
-  if (hostname.includes('github')) {
-    const [owner, repo] = pathname.split('/').filter((p) => p);
-    return `https://main--${repo}--${owner}.hlx.live/sitemap.xml`;
-  }
-  return null;
-}
-
-// async function findSitemapUrl(url) {
-//   const req = await fetch(url);
-//   if (req.ok) {
-//     const text = await req.text();
-//     const lines = text.split('\n');
-//     const sitemapLine = lines.find((line) => line.startsWith('Sitemap'));
-//     return sitemapLine ? sitemapLine.split(' ')[1] : null;
-//   }
-//   return null;
-// }
 
 /**
- * Fetches URLs from a sitemap.
- * @param {string} sitemap - URL of the sitemap to fetch.
- * @returns {Promise<Object[]>} - Promise that resolves to an array of URL objects.
+ * Converts report rows into a CSV Blob.
+ * @param {Object[]} rows - Array of report rows to be converted.
+ * @returns {Blob|null} Blob representing the CSV data.
  */
-async function fetchSitemap(sitemap) {
-  const req = await fetch(sitemap);
-  if (req.ok) {
-    const text = await req.text();
-    const xml = new DOMParser().parseFromString(text, 'text/xml');
+function generateCSV(rows) {
+  if (rows.length === 0) return null;
+  // write the CSV column headers using the keys from the first row object
+  const headers = `${Object.keys(rows[0]).join(',')}\n`;
+  // convert the rows into a single string separated by newlines
+  const csv = headers + rows.map((row) => Object.values(row).map((value) => {
+    const escape = (`${value}`).replace(/"/g, '""'); // escape quotes
+    return `"${escape}"`;
+  }).join(',')).join('\n');
+  // create a Blob from the CSV string
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  return blob;
+}
 
-    // check for nested sitemaps and recursively fetch them
-    if (xml.querySelector('sitemap')) {
-      const sitemaps = [...xml.querySelectorAll('sitemap loc')];
-      const allUrls = [];
-      // eslint-disable-next-line no-restricted-syntax
-      for (const loc of sitemaps) {
-        const { href, origin } = new URL(loc.textContent.trim());
-        const originSwapped = href.replace(origin, sitemap.origin);
-        // eslint-disable-next-line no-await-in-loop
-        const nestedUrls = await fetchSitemap(originSwapped);
-        allUrls.push(...nestedUrls);
-      }
-      return allUrls;
-    }
-    if (xml.querySelector('url')) {
-      const urls = [...xml.querySelectorAll('url loc')].map((loc) => {
-        const { href, origin } = new URL(loc.textContent.trim());
-        const originSwapped = href.replace(origin, new URL(sitemap).origin);
-        const plain = `${originSwapped.endsWith('/') ? `${originSwapped}index` : originSwapped}.plain.html`;
-        return { href: originSwapped, plain };
-      });
-      return urls;
-    }
-  }
-  return [];
+/* modal utilities */
+/**
+ * Generates a unique ID for a modal based on the image source URL.
+ * @param {string} src - Source URL of the image.
+ * @returns {string} Generated or extracted modal ID.
+ */
+function getModalId(src) {
+  if (src.includes('_')) return src.split('_')[1].split('.')[0];
+  return Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
 }
 
 class RewrittenData {
@@ -165,23 +105,21 @@ class RewrittenData {
   }
 }
 
-function getModalId(src) {
-  if (src.includes('_')) {
-    return src.split('_')[1].split('.')[0];
-  }
-  return Date.now().toString(36) + Math.random().toString(36).substring(2, 15);
-}
-
+/**
+ * Displays (and creates) a modal with image information.
+ * @param {HTMLElement} figure - Figure element representing the image.
+ */
 function displayModal(figure) {
   const { src } = figure.querySelector(':scope > img[data-src]').dataset;
   const id = getModalId(src);
+  // check if a modal with this ID already exists
   let modal = document.getElementById(id);
   if (!modal) {
     // build new modal
     const [newModal, body] = buildModal();
     newModal.id = id;
     modal = newModal;
-    // populate modal
+    // define and populate modal content
     const table = document.createElement('table');
     table.innerHTML = '<tbody></tbody>';
     const rows = {
@@ -210,69 +148,32 @@ function displayModal(figure) {
   modal.showModal();
 }
 
+/* image processing and display */
+/**
+ * Validates that every image in an array has alt text.
+ * @param {string[]} alt - Array of alt text strings associated with the image.
+ * @param {number} count - Expected number of alt text entries (equal to the number of appearances).
+ * @returns {boolean} `true` if the alt text is valid, `false` otherwise.
+ */
 function validateAlt(alt, count) {
   if (alt.length === 0 || alt.length !== count) return false;
+  if (alt.some((item) => item === '')) return false;
   return true;
 }
 
-function displayImages(images) {
-  const gallery = document.getElementById('image-gallery');
-  images.forEach((data) => {
-    const figure = document.createElement('figure');
-    figure.dataset.alt = validateAlt(data.alt, data.count);
-    figure.dataset.aspectRatio = data.aspectRatio;
-    figure.dataset.count = data.count;
-    // build image
-    const { href } = new URL(data.src, data.origin);
-    const img = document.createElement('img');
-    img.dataset.src = href;
-    img.width = data.width;
-    img.height = data.height;
-    img.loading = 'lazy';
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.timeoutId = setTimeout(() => {
-            img.src = img.dataset.src;
-            // figure.addEventListener('click', (e) => {
-            //   displayModal(e.currentTarget);
-            // });
-            observer.disconnect();
-          }, 500);
-        } else {
-          clearTimeout(entry.target.timeoutId);
-        }
-      });
-    }, { threshold: 0 });
-    observer.observe(figure);
-    figure.append(img);
-    // build info button
-    const info = document.createElement('button');
-    info.setAttribute('aria-label', 'More information');
-    info.setAttribute('type', 'button');
-    info.innerHTML = '<span class="icon icon-info"></span>';
-    figure.append(info);
-    // check for existing figure el with the same img src
-    const existingImg = gallery.querySelector(`figure img[src="${href}"], figure [data-src="${href}"]`);
-    if (existingImg) {
-      const existingFigure = existingImg.parentElement;
-      const existingCount = parseInt(existingFigure.dataset.count, 10);
-      // if count has changed, replace existing figure with new one
-      if (existingCount !== data.count) {
-        gallery.replaceChild(figure, existingFigure);
-      }
-    } else gallery.append(figure);
-  });
-}
-
+/**
+ * Filters out duplicate images and compiles unique image data.
+ * @param {Object[]} data - Array of image data objects.
+ * @returns {Object[]} Array of unique image data objects.
+ */
 function findUniqueImages(data) {
+  // use a map to track unique images by their src attribute
   const unique = new Map();
-
   data.forEach((img) => {
     const {
       src, origin, site, alt, width, height, aspectRatio, fileType,
     } = img;
-    // init new unique image
+    // if the image src is not already in the map, init a new entry
     if (!unique.has(src)) {
       unique.set(src, {
         src,
@@ -286,16 +187,84 @@ function findUniqueImages(data) {
         fileType,
       });
     }
-    // populate image entry
+    // update the existing entry with additional image data
     const entry = unique.get(src);
     entry.count += 1;
     entry.site.push(site);
     entry.alt.push(alt);
   });
-
+  // convert the map values to an array
   return [...unique.values()];
 }
 
+/**
+ * Displays a collection of images in the gallery.
+ * @param {Object[]} images - Array of image data objects to be displayed.
+ */
+function displayImages(images) {
+  const gallery = document.getElementById('image-gallery');
+  images.forEach((data) => {
+    // create a new figure to hold the image and its metadata
+    const figure = document.createElement('figure');
+    figure.dataset.alt = validateAlt(data.alt, data.count);
+    figure.dataset.aspect = data.aspectRatio;
+    figure.dataset.count = data.count;
+    // build image
+    const { href } = new URL(data.src, data.origin);
+    const img = document.createElement('img');
+    img.dataset.src = href;
+    img.width = data.width;
+    img.height = data.height;
+    img.loading = 'lazy';
+    figure.append(img);
+    // load the image when it comes into view
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.timeoutId = setTimeout(() => {
+            img.src = img.dataset.src;
+            observer.disconnect();
+          }, 500); // delay image loading
+        } else {
+          // cancel loading delay if image is scrolled out of view
+          clearTimeout(entry.target.timeoutId);
+        }
+      });
+    }, { threshold: 0 });
+    observer.observe(figure);
+    // build info button
+    const info = document.createElement('button');
+    info.setAttribute('aria-label', 'More information');
+    info.setAttribute('type', 'button');
+    info.innerHTML = '<span class="icon icon-info"></span>';
+    figure.append(info);
+    // check if image already exists in the gallery
+    const existingImg = gallery.querySelector(`figure img[src="${href}"], figure [data-src="${href}"]`);
+    if (existingImg) {
+      const existingFigure = existingImg.parentElement;
+      const existingCount = parseInt(existingFigure.dataset.count, 10);
+      if (existingCount !== data.count) {
+        // if count has changed, replace existing figure with the new one
+        gallery.replaceChild(figure, existingFigure);
+      }
+    } else gallery.append(figure);
+  });
+}
+
+/**
+ * Updates the numeric content of an HTML element by a specified increment.
+ * @param {HTMLElement} counter - Counter whose text content will be updated.
+ * @param {number} increment - Amount to increment the current value by.
+ * @param {boolean} [float=false] - Check if counter will be updated by a float or an integer.
+ */
+function updateCounter(counter, increment, float = false) {
+  const value = parseFloat(counter.textContent, 10);
+  // calculate the new value (or reset to 0 if no increment is provided)
+  const targetValue = increment ? value + increment : 0;
+  counter.textContent = float ? targetValue.toFixed(1) : Math.floor(targetValue);
+}
+
+/* fetching data */
 /**
  * Fetches the HTML content of a page.
  * @param {string} url - URL of the page to fetch.
@@ -356,7 +325,7 @@ async function fetchImageDataFromPage(url) {
  * @param {number} concurrency - Number of concurrent fetches within the batch.
  * @returns {Promise<Object[]>} - Promise that resolves to an array of image data objects.
  */
-async function fetchBatch(batch, concurrency) {
+async function fetchBatch(batch, concurrency, counter) {
   const results = [];
   const tasks = [];
 
@@ -365,6 +334,7 @@ async function fetchBatch(batch, concurrency) {
       while (batch.length > 0) {
         // get the next URL from the batch
         const url = batch.shift();
+        updateCounter(counter, 1);
         // eslint-disable-next-line no-await-in-loop
         const imgData = await fetchImageDataFromPage(url);
         results.push(...imgData);
@@ -376,12 +346,6 @@ async function fetchBatch(batch, concurrency) {
   return results;
 }
 
-function updateCounter(el, increment, float = false) {
-  const value = parseFloat(el.textContent, 10);
-  const targetValue = increment ? value + increment : 0;
-  el.textContent = float ? targetValue.toFixed(1) : Math.floor(targetValue);
-}
-
 /**
  * Fetches and display image data in batches.
  * @param {Object[]} urls - Array of URL objects.
@@ -391,10 +355,12 @@ function updateCounter(el, increment, float = false) {
  * @returns {Promise<Object[]>} - Promise that resolves to an array of image data objects.
  */
 async function fetchAndDisplayBatches(urls, batchSize = 50, delay = 2000, concurrency = 5) {
+  window.audit = [];
   const data = [];
   const main = document.querySelector('main');
   const results = document.getElementById('audit-results');
   const download = results.querySelector('button');
+  download.disabled = true;
   const gallery = document.getElementById('image-gallery');
   gallery.innerHTML = '';
 
@@ -404,6 +370,7 @@ async function fetchAndDisplayBatches(urls, batchSize = 50, delay = 2000, concur
   const pagesCounter = document.getElementById('pages-counter');
   updateCounter(pagesCounter);
   const totalCounter = document.getElementById('total-counter');
+  updateCounter(totalCounter);
   updateCounter(totalCounter, urls.length);
   const elapsed = document.getElementById('elapsed');
   updateCounter(elapsed);
@@ -413,9 +380,8 @@ async function fetchAndDisplayBatches(urls, batchSize = 50, delay = 2000, concur
   for (let i = 0; i < urls.length; i += batchSize) {
     // get the next batch of URLs
     const batch = urls.slice(i, i + batchSize);
-    updateCounter(pagesCounter, batch.length);
     // eslint-disable-next-line no-await-in-loop
-    const batchData = await fetchBatch(batch, concurrency); // fetch the batch concurrently
+    const batchData = await fetchBatch(batch, concurrency, pagesCounter);
     data.push(...batchData);
 
     // display images as they are fetched
@@ -437,31 +403,163 @@ async function fetchAndDisplayBatches(urls, batchSize = 50, delay = 2000, concur
 
     batchData.length = 0;
   }
+  data.length = 0;
 
-  // update download button
   download.disabled = false;
   clearInterval(timer);
   return data;
 }
 
+/* url and sitemap utility */
+const AEM_HOSTS = ['hlx.page', 'hlx.live', 'aem.page', 'aem.live'];
+
+/**
+ * Determines the type of a URL based on its hostname and pathname.
+ * @param {string} url - URL to evaluate.
+ * @returns {string|boolean} Type of URL.
+ */
+function extractUrlType(url) {
+  const { hostname, pathname } = new URL(url);
+  const aemSite = AEM_HOSTS.find((h) => hostname.endsWith(h));
+  if (pathname.endsWith('.xml')) return 'sitemap';
+  if (pathname.includes('robots.txt')) return 'robots';
+  if (aemSite || hostname.includes('github')) return 'write sitemap';
+  return null;
+}
+
+/**
+ * Constructs a sitemap URL.
+ * @param {string} url - URL to use for constructing the sitemap.
+ * @returns {string|null} Sitemap URL.
+ */
+function writeSitemapUrl(url) {
+  const { hostname, pathname } = new URL(url);
+  const aemSite = AEM_HOSTS.find((h) => hostname.endsWith(h));
+  // construct sitemap URL for an AEM site
+  if (aemSite) {
+    const [ref, repo, owner] = hostname.replace(`.${aemSite}`, '').split('--');
+    return `https://${ref}--${repo}--${owner}.${aemSite.split('.')[0]}.live/sitemap.xml`;
+  }
+  // construct a sitemap URL for a GitHub repository
+  if (hostname.includes('github')) {
+    const [owner, repo] = pathname.split('/').filter((p) => p);
+    return `https://main--${repo}--${owner}.hlx.live/sitemap.xml`;
+  }
+  return null;
+}
+
+/**
+ * Attempts to find a sitemap URL within a robots.txt file.
+ * @param {string} url - URL of the robots.txt file.
+ * @returns {Promise<string|null>} Sitemap URL.
+ */
+// async function findSitemapUrl(url) {
+//   const req = await fetch(url);
+//   if (req.ok) {
+//     const text = await req.text();
+//     const lines = text.split('\n');
+//     const sitemapLine = lines.find((line) => line.startsWith('Sitemap'));
+//     return sitemapLine ? sitemapLine.split(' ')[1] : null;
+//   }
+//   return null;
+// }
+
+/**
+ * Fetches URLs from a sitemap.
+ * @param {string} sitemap - URL of the sitemap to fetch.
+ * @returns {Promise<Object[]>} - Promise that resolves to an array of URL objects.
+ */
+async function fetchSitemap(sitemap) {
+  const req = await fetch(sitemap);
+  if (req.ok) {
+    const text = await req.text();
+    const xml = new DOMParser().parseFromString(text, 'text/xml');
+    // check for nested sitemaps and recursively fetch them
+    if (xml.querySelector('sitemap')) {
+      const sitemaps = [...xml.querySelectorAll('sitemap loc')];
+      const allUrls = [];
+      // eslint-disable-next-line no-restricted-syntax
+      for (const loc of sitemaps) {
+        const { href, origin } = new URL(loc.textContent.trim());
+        const originSwapped = href.replace(origin, sitemap.origin);
+        // eslint-disable-next-line no-await-in-loop
+        const nestedUrls = await fetchSitemap(originSwapped);
+        allUrls.push(...nestedUrls);
+      }
+      return allUrls;
+    }
+    if (xml.querySelector('url')) {
+      const urls = [...xml.querySelectorAll('url loc')].map((loc) => {
+        const { href, origin } = new URL(loc.textContent.trim());
+        const originSwapped = href.replace(origin, new URL(sitemap).origin);
+        const plain = `${originSwapped.endsWith('/') ? `${originSwapped}index` : originSwapped}.plain.html`;
+        return { href: originSwapped, plain };
+      });
+      return urls;
+    }
+  }
+  return [];
+}
+
+/* setup */
 async function processForm(sitemap) {
   const urls = await fetchSitemap(sitemap);
   // await fetchAndDisplayBatches(urls.slice(8000, 8100));
   await fetchAndDisplayBatches(urls);
 }
 
+function getFormData(form) {
+  const data = {};
+  [...form.elements].forEach((field) => {
+    const { name, type, value } = field;
+    if (name && type && value) {
+      switch (type) {
+        case 'number':
+        case 'range':
+          data[name] = parseFloat(value, 10);
+          break;
+        case 'date':
+        case 'datetime-local':
+          data[name] = new Date(value);
+          break;
+        case 'checkbox':
+          if (field.checked) {
+            if (data[name]) data[name].push(value);
+            else data[name] = [value];
+          }
+          break;
+        case 'radio':
+          if (field.checked) data[name] = value;
+          break;
+        case 'url':
+          data[name] = new URL(value);
+          break;
+        case 'file':
+          data[name] = field.files;
+          break;
+        default:
+          data[name] = value;
+      }
+    }
+  });
+  return data;
+}
+
 function registerListeners(doc) {
   const URL_FORM = doc.getElementById('site-form');
-  // const URL_FIELD = URL_FORM.querySelector('#site-url');
   const CANVAS = doc.getElementById('canvas');
   const GALLERY = CANVAS.querySelector('.gallery');
+  const DOWNLOAD = doc.getElementById('download-report');
   const ACTION_BAR = CANVAS.querySelector('.action-bar');
-  const ACTIONS = ACTION_BAR.querySelectorAll('button');
-  const APPEARANCES_SORT = doc.getElementById('sort-count');
-  const ASPECTRATIO_SORT = doc.getElementById('sort-aspect');
+  const SORT_ACTIONS = ACTION_BAR.querySelectorAll('input[name="sort"]');
+  const FILTER_ACTIONS = ACTION_BAR.querySelectorAll('input[name="filter"]');
 
+  // handle form submission
   URL_FORM.addEventListener('submit', async (e) => {
     e.preventDefault();
+    // clear all sorting and filters
+    // eslint-disable-next-line no-return-assign
+    [...SORT_ACTIONS, ...FILTER_ACTIONS].forEach((action) => action.checked = false);
     const data = getFormData(e.srcElement);
     const url = data['site-url'];
     const urlType = extractUrlType(url);
@@ -472,39 +570,82 @@ function registerListeners(doc) {
     }
   });
 
+  // handle gallery clicks to display modals
   GALLERY.addEventListener('click', (e) => {
     const figure = e.target.closest('figure');
     if (figure) displayModal(figure);
   });
 
-  APPEARANCES_SORT.addEventListener('click', () => {
-    const selected = APPEARANCES_SORT.getAttribute('aria-selected') === 'true';
-    if (!selected) {
-      ACTIONS.forEach((action) => action.setAttribute('aria-selected', false));
-      APPEARANCES_SORT.setAttribute('aria-selected', true);
-      const figures = [...GALLERY.querySelectorAll('figure')];
-      const sorted = figures.sort((a, b) => {
-        const countA = parseInt(a.getAttribute('data-count'), 10);
-        const countB = parseInt(b.getAttribute('data-count'), 10);
-        return countB - countA;
-      });
-      GALLERY.append(...sorted);
+  // handle csv report download
+  DOWNLOAD.addEventListener('click', () => {
+    const rows = writeReportRows();
+    if (rows[0]) {
+      const site = new URL(rows[0].Site).hostname.split('.')[0];
+      const csv = generateCSV(rows);
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(csv);
+      // insert link to enable download
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${site}_image_audit_report.csv`);
+      link.style.display = 'none';
+      DOWNLOAD.insertAdjacentElement('afterend', link);
+      link.click();
+      link.remove();
     }
   });
 
-  ASPECTRATIO_SORT.addEventListener('click', () => {
-    const selected = ASPECTRATIO_SORT.getAttribute('aria-selected') === 'true';
-    if (!selected) {
-      ACTIONS.forEach((action) => action.setAttribute('aria-selected', false));
-      ASPECTRATIO_SORT.setAttribute('aria-selected', true);
+  SORT_ACTIONS.forEach((action) => {
+    action.addEventListener('click', (e) => {
+      const { target } = e;
+      const type = target.value;
+      // get the current sort order (1 for ascending, -1 for descending)
+      const sortOrder = parseInt(target.dataset.order, 10);
       const figures = [...GALLERY.querySelectorAll('figure')];
+      // sort figures based on selected type and order
       const sorted = figures.sort((a, b) => {
-        const aspectA = parseFloat(a.getAttribute('data-aspect-ratio'), 10);
-        const aspectB = parseFloat(b.getAttribute('data-aspect-ratio'), 10);
-        return aspectB - aspectA;
+        const aVal = parseFloat(a.dataset[type], 10);
+        const bVal = parseFloat(b.dataset[type], 10);
+        return sortOrder > 0 ? aVal - bVal : bVal - aVal;
       });
       GALLERY.append(...sorted);
-    }
+      // toggle the sort order for the next click
+      target.dataset.order = sortOrder * -1;
+    });
+  });
+
+  FILTER_ACTIONS.forEach((action) => {
+    action.addEventListener('change', () => {
+      const checked = [...FILTER_ACTIONS].filter((a) => a.checked).map((a) => a.value);
+      const figures = [...GALLERY.querySelectorAll('figure')];
+
+      figures.forEach((figure) => {
+        const hasAlt = figure.dataset.alt === 'true';
+        const aspect = parseFloat(figure.dataset.aspect, 10);
+        // eslint-disable-next-line no-nested-ternary
+        const shape = aspect === 1 ? 'square'
+          // eslint-disable-next-line no-nested-ternary
+          : aspect < 1 ? 'portrait'
+            : aspect > 1.7 ? 'widescreen' : 'landscape';
+
+        let hide = true; // hide figures by default
+
+        // check images against filter critera
+        if (checked.includes('missing-alt') && !checked.some((f) => f !== 'missing-alt')) { // only 'missing-alt' is selected
+          // only show figures without alt text
+          hide = hasAlt;
+        } else if (checked.includes('missing-alt') && checked.some((f) => f !== 'missing-alt')) { // 'missing-alt' is selected along with shape(s)
+          // show figures without alt text that match any selected shape(s)
+          hide = !(checked.includes(shape) && !hasAlt);
+        } else if (!checked.includes('missing-alt') && checked.includes(shape)) { // only shapes are selected
+          // show figures that match the selected shape(s)
+          hide = false;
+        } else if (checked.length === 0) { // no filters are selected
+          // show all figures
+          hide = false;
+        }
+        figure.setAttribute('aria-hidden', hide);
+      });
+    });
   });
 }
 

@@ -1,4 +1,4 @@
-.image-audit [aria-hidden] {
+.image-audit [aria-hidden='true'] {
   display: none;
 }
 

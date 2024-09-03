@@ -55,6 +55,8 @@
 
 .site-admin .sites-site-name {
   grid-area: id;
+  font-size: var(--body-size-xl);
+  font-weight: bold;
 }
 
 .site-admin .sites-site-edit {
@@ -63,4 +65,45 @@
 
 .site-admin .sites-site-details {
   grid-area: details;
+  margin-top: var(--spacing-m);
+  padding-top: var(--spacing-m);
+  border-top: var(--border-s) solid var(--gray-300);  
+}
+
+.site-admin-oinw {
+  margin-bottom: -2px;
+  margin-left: 4px;
+  box-sizing: border-box;
+  position: relative;
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border: 2px solid;
+  transform: 1;
+  border-radius: 4px;
+}
+
+.site-admin-oinw::after,
+.site-admin-oinw::before {
+  content: "";
+  display: block;
+  box-sizing: border-box;
+  position: absolute;
+  right: 4px;
+}
+
+.site-admin-oinw::after {
+  width: 10px;
+  height: 2px;
+  background: currentColor;
+  transform: rotate(-45deg);
+  bottom: 8px;
+}
+
+.site-admin-oinw::before {
+  width: 6px;
+  height: 6px;
+  top: 4px;
+  border-top: 2px solid;
+  border-right: 2px solid;
 }

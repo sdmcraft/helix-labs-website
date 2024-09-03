@@ -69,6 +69,8 @@ async function saveSiteConfig(path, site, codeSrc, contentSrc) {
   });
   await resp.text();
   logResponse([resp.status, 'POST', adminURL, resp.headers.get('x-error') || '']);
+  // eslint-disable-next-line no-use-before-define
+  displaySitesForOrg(org.value);
 }
 
 async function deleteSiteConfig(path) {
@@ -78,6 +80,8 @@ async function deleteSiteConfig(path) {
   });
   await resp.text();
   logResponse([resp.status, 'DELETE', adminURL, resp.headers.get('x-error') || '']);
+  // eslint-disable-next-line no-use-before-define
+  displaySitesForOrg(org.value);
 }
 
 function displaySiteDetails(path, name, elem, site = {
@@ -142,26 +146,50 @@ function displaySiteDetails(path, name, elem, site = {
   });
 }
 
-function displaySite(site, sitesList) {
+function displaySite(site, sitesList, editMode = false) {
   const li = document.createElement('li');
-  li.innerHTML = `<div class="sites-site-name">${site.name}</div>`;
-  const button = document.createElement('button');
-  button.className = 'sites-site-edit button';
-  button.dataset.path = site.path;
-  button.textContent = 'Edit';
-  li.append(button);
+  li.innerHTML = `<div class="sites-site-name">${site.name} <a target="_blank" href="https://main--${site.name}--${org.value}.aem.live/"><span class="site-admin-oinw"></span></a></div>`;
+  const buttons = document.createElement('div');
+  buttons.className = 'sites-site-edit';
+  const edit = document.createElement('button');
+  edit.className = 'button';
+  edit.dataset.path = site.path;
+  edit.textContent = 'Edit';
+  edit.ariaHidden = editMode;
+  buttons.append(edit);
+  const cancel = document.createElement('button');
+  cancel.className = 'button outline';
+  cancel.dataset.path = site.path;
+  cancel.textContent = 'Cancel';
+  cancel.ariaHidden = !editMode;
+  buttons.append(cancel);
+  li.append(buttons);
   const details = document.createElement('div');
   details.className = 'sites-site-details';
+  details.ariaHidden = !editMode;
+
   li.append(details);
-  button.addEventListener('click', async () => {
+
+  edit.addEventListener('click', async () => {
     const adminURL = `https://admin.hlx.page${site.path}`;
     const resp = await fetch(adminURL);
     if (resp.status === 200) {
       const siteDetails = await resp.json();
       displaySiteDetails(site.path, site.name, details, siteDetails);
+      cancel.ariaHidden = false;
+      edit.ariaHidden = true;
+      details.ariaHidden = false;
     }
     logResponse([resp.status, 'GET', adminURL, resp.headers.get('x-error') || '']);
   });
+
+  cancel.addEventListener('click', async () => {
+    cancel.ariaHidden = true;
+    edit.ariaHidden = false;
+    details.innerText = '';
+    details.ariaHidden = true;
+  });
+
   sitesList.append(li);
   return details;
 }
@@ -173,7 +201,7 @@ async function addNewSite(sitesList, blueprint) {
     const details = displaySite({
       name: sitename,
       path,
-    }, sitesList);
+    }, sitesList, true);
     displaySiteDetails(path, sitename, details, blueprint);
   }
 }

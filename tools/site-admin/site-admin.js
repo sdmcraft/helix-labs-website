@@ -148,7 +148,7 @@ function displaySiteDetails(path, name, elem, site = {
 
 function displaySite(site, sitesList, editMode = false) {
   const li = document.createElement('li');
-  li.innerHTML = `<div class="sites-site-name">${site.name} <a target="_blank" href="https://main--${site.name}--${org.value}.aem.live/"><span class="site-admin-oinw"></span></a></div>`;
+  li.innerHTML = `<div class="sites-site-name">${site.name} <a target="_blank" href="https://main--${site.name}--${org.value}.aem.page/"><span class="site-admin-oinw"></span></a></div>`;
   const buttons = document.createElement('div');
   buttons.className = 'sites-site-edit';
   const edit = document.createElement('button');

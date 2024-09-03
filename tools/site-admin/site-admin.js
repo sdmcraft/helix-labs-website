@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 const adminForm = document.getElementById('site-admin-form');
 const org = document.getElementById('org');
 const logTable = document.querySelector('table tbody');
@@ -29,32 +30,32 @@ function logResponse(cols) {
 
 async function saveSiteConfig(path, site, codeSrc, contentSrc) {
   const codeURL = new URL(codeSrc);
-  const [,owner,repo] = codeURL.pathname.split('/');
+  const [, owner, repo] = codeURL.pathname.split('/');
   const code = {
     owner,
     repo,
     source: {
       type: 'github',
       url: codeSrc,
-    }
+    },
   };
   const content = {
     source: {
       type: 'markup',
       url: contentSrc,
-    }
+    },
   };
 
   const contentURL = new URL(contentSrc);
   if (contentSrc.startsWith('https://drive.google.com/drive')) {
-      const id = contentURL.pathname.split('/').pop();
-      content.source.type = 'google';
-      content.source.id = id;
+    const id = contentURL.pathname.split('/').pop();
+    content.source.type = 'google';
+    content.source.id = id;
   }
 
   if (contentSrc.includes('sharepoint.com/')) {
     content.source.type = 'onedrive';
-}
+  }
 
   site.content = content;
   site.code = code;
@@ -64,9 +65,9 @@ async function saveSiteConfig(path, site, codeSrc, contentSrc) {
     body: JSON.stringify(site),
     headers: {
       'content-type': 'application/json',
-    }
+    },
   });
-  const text = await resp.text();
+  await resp.text();
   logResponse([resp.status, 'POST', adminURL, resp.headers.get('x-error') || '']);
 }
 
@@ -75,23 +76,23 @@ async function deleteSiteConfig(path) {
   const resp = await fetch(adminURL, {
     method: 'DELETE',
   });
-  const text = await resp.text();
+  await resp.text();
   logResponse([resp.status, 'DELETE', adminURL, resp.headers.get('x-error') || '']);
 }
 
-function displaySiteDetails(path, name, site = {
-    code: {
-      source: {
-        url: ''
-      },
+function displaySiteDetails(path, name, elem, site = {
+  code: {
+    source: {
+      url: '',
     },
-    content: {
-      source: {
-        url: ''
-      }
-    }
-  }, elem) {
-    elem.innerHTML = `<form id=${name}>
+  },
+  content: {
+    source: {
+      url: '',
+    },
+  },
+}) {
+  elem.innerHTML = `<form id=${name}>
         <div class="form-field url-field">
           <label for="${name}-code">GitHub URL</label>
           <input value="${site.code.source.url}" name="code" id="${name}-code" required type="url"/>
@@ -116,41 +117,29 @@ function displaySiteDetails(path, name, site = {
           <button id="${name}-delete" class="button outline">Delete ...</button>
         </p>
     </form>`;
-    const save = elem.querySelector(`#${name}-save`);
-    save.addEventListener('click', (e) => {
-      e.preventDefault();
-      const contentSrc = elem.querySelector('input[name="content"]').value;
-      const codeSrc = elem.querySelector('input[name="code"]').value;
-      saveSiteConfig(path, site, codeSrc, contentSrc);
-    });
-    const clone = elem.querySelector(`#${name}-clone`);
-    clone.addEventListener('click', (e) => {
-      e.preventDefault();
-      const contentSrc = elem.querySelector('input[name="content"]').value;
-      const codeSrc = elem.querySelector('input[name="code"]').value;
-      const sitename = prompt('Enter name of new site (eg. site1)');
-      const newpath = path.substring(0, path.lastIndexOf('/')) + `/${sitename}.json`;
-      saveSiteConfig(newpath, site, codeSrc, contentSrc);
-    });
-    const remove = elem.querySelector(`#${name}-delete`);
-    remove.addEventListener('click', (e) => {
-      e.preventDefault();
-      const [owner,site] = prompt('For safety enter org/sitename of the site you are about to delete').split('/');
+  const save = elem.querySelector(`#${name}-save`);
+  save.addEventListener('click', (e) => {
+    e.preventDefault();
+    const contentSrc = elem.querySelector('input[name="content"]').value;
+    const codeSrc = elem.querySelector('input[name="code"]').value;
+    saveSiteConfig(path, site, codeSrc, contentSrc);
+  });
+  const clone = elem.querySelector(`#${name}-clone`);
+  clone.addEventListener('click', (e) => {
+    e.preventDefault();
+    const contentSrc = elem.querySelector('input[name="content"]').value;
+    const codeSrc = elem.querySelector('input[name="code"]').value;
+    const sitename = prompt('Enter name of new site (eg. site1)');
+    const newpath = `${path.substring(0, path.lastIndexOf('/'))}/${sitename}.json`;
+    saveSiteConfig(newpath, site, codeSrc, contentSrc);
+  });
+  const remove = elem.querySelector(`#${name}-delete`);
+  remove.addEventListener('click', (e) => {
+    e.preventDefault();
+    const [owner, sitecheck] = prompt('For safety enter org/sitename of the site you are about to delete').split('/');
 
-      if  (path === `/config/${owner}/sites/${site}.json`) deleteSiteConfig(path);
-    });   
-}
-
-async function addNewSite(sitesList, blueprint) {
-  const sitename = prompt('Enter name of new site (eg. site1)');
-  if (sitename) {
-    const path = `/config/${org.value}/sites/${sitename}.json`;
-    const details = displaySite({
-      name: sitename,
-      path,
-    }, sitesList);
-  displaySiteDetails(path, sitename, blueprint, details);
-  }
+    if (path === `/config/${owner}/sites/${sitecheck}.json`) deleteSiteConfig(path);
+  });
 }
 
 function displaySite(site, sitesList) {
@@ -167,14 +156,26 @@ function displaySite(site, sitesList) {
   button.addEventListener('click', async () => {
     const adminURL = `https://admin.hlx.page${site.path}`;
     const resp = await fetch(adminURL);
-    if (resp.status == 200) {
+    if (resp.status === 200) {
       const siteDetails = await resp.json();
-      displaySiteDetails(site.path, site.name, siteDetails, details);
+      displaySiteDetails(site.path, site.name, details, siteDetails);
     }
     logResponse([resp.status, 'GET', adminURL, resp.headers.get('x-error') || '']);
   });
   sitesList.append(li);
   return details;
+}
+
+async function addNewSite(sitesList, blueprint) {
+  const sitename = prompt('Enter name of new site (eg. site1)');
+  if (sitename) {
+    const path = `/config/${org.value}/sites/${sitename}.json`;
+    const details = displaySite({
+      name: sitename,
+      path,
+    }, sitesList);
+    displaySiteDetails(path, sitename, details, blueprint);
+  }
 }
 
 function displaySites(sites) {
@@ -186,13 +187,14 @@ function displaySites(sites) {
   addNew.className = 'button';
   addNew.textContent = 'Add new site...';
   addNew.addEventListener('click', () => {
+    // eslint-disable-next-line no-use-before-define
     addNewSite(sitesList);
   });
   div.append(addNew);
   sitesElem.append(div);
   const div2 = document.createElement('div');
   const sitesList = document.createElement('ol');
-  sitesList.id = "sites-list";
+  sitesList.id = 'sites-list';
   sites.forEach((site) => {
     displaySite(site, sitesList);
   });
@@ -203,9 +205,8 @@ function displaySites(sites) {
 async function displaySitesForOrg(orgValue) {
   const adminURL = `https://admin.hlx.page/config/${orgValue}/sites.json`;
   const resp = await fetch(adminURL);
-  if (resp.status == 200) {
+  if (resp.status === 200) {
     const { sites } = await resp.json();
-    console.log(sites);
     displaySites(sites);
   }
   logResponse([resp.status, 'GET', adminURL, resp.headers.get('x-error') || '']);
@@ -219,14 +220,7 @@ adminForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   localStorage.setItem('org', org.value);
   displaySitesForOrg(org.value);
-
-});
-
-// handles admin form reset, clearing the body field
-adminForm.addEventListener('reset', () => {
-  body.value = '';
 });
 
 org.value = localStorage.getItem('org') || 'adobe';
 if (org.value) displaySitesForOrg(org.value);
-

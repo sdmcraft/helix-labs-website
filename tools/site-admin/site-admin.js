@@ -117,7 +117,7 @@ function displaySiteDetails(path, name, elem, site = {
         </div>
         <p class="button-wrapper">
           <button type="submit" id="${name}-save" class="button">Save</button>
-          <button id="${name}-clone" class="button outline">Copy Site to ...</button>
+          <button id="${name}-clone" class="button outline">Copy Site Config ...</button>
           <button id="${name}-delete" class="button outline">Delete ...</button>
         </p>
     </form>`;
@@ -134,8 +134,10 @@ function displaySiteDetails(path, name, elem, site = {
     const contentSrc = elem.querySelector('input[name="content"]').value;
     const codeSrc = elem.querySelector('input[name="code"]').value;
     const sitename = prompt('Enter name of new site (eg. site1)');
-    const newpath = `${path.substring(0, path.lastIndexOf('/'))}/${sitename}.json`;
-    saveSiteConfig(newpath, site, codeSrc, contentSrc);
+    if (sitename) {
+      const newpath = `${path.substring(0, path.lastIndexOf('/'))}/${sitename}.json`;
+      saveSiteConfig(newpath, site, codeSrc, contentSrc);
+    }
   });
   const remove = elem.querySelector(`#${name}-delete`);
   remove.addEventListener('click', (e) => {

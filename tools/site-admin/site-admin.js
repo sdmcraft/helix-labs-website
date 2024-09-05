@@ -97,6 +97,7 @@ function displaySiteDetails(path, name, elem, site = {
   },
 }) {
   elem.innerHTML = `<form id=${name}>
+        <fieldset>
         <div class="form-field url-field">
           <label for="${name}-code">GitHub URL</label>
           <input value="${site.code.source.url}" name="code" id="${name}-code" required type="url"/>
@@ -120,9 +121,13 @@ function displaySiteDetails(path, name, elem, site = {
           <button id="${name}-clone" class="button outline">Copy Site Config ...</button>
           <button id="${name}-delete" class="button outline">Delete ...</button>
         </p>
+        </fieldset>
     </form>`;
+  const fs = elem.querySelector('fieldset');
   const save = elem.querySelector(`#${name}-save`);
   save.addEventListener('click', (e) => {
+    fs.disabled = 'disabled';
+    save.innerHTML += ' <i class="symbol symbol-loading"></i>';
     e.preventDefault();
     const contentSrc = elem.querySelector('input[name="content"]').value;
     const codeSrc = elem.querySelector('input[name="code"]').value;
@@ -133,6 +138,8 @@ function displaySiteDetails(path, name, elem, site = {
     e.preventDefault();
     const sitename = prompt('Enter name of new site (eg. site1)');
     if (sitename) {
+      fs.disabled = 'disabled';
+      clone.innerHTML += ' <i class="symbol symbol-loading"></i>';
       const contentSrc = elem.querySelector('input[name="content"]').value;
       const codeSrc = elem.querySelector('input[name="code"]').value;
       const newpath = `${path.substring(0, path.lastIndexOf('/'))}/${sitename}.json`;
@@ -144,7 +151,11 @@ function displaySiteDetails(path, name, elem, site = {
     e.preventDefault();
     const [owner, sitecheck] = prompt('For safety enter org/sitename of the site you are about to delete').split('/');
 
-    if (path === `/config/${owner}/sites/${sitecheck}.json`) deleteSiteConfig(path);
+    if (path === `/config/${owner}/sites/${sitecheck}.json`) {
+      fs.disabled = 'disabled';
+      remove.innerHTML += ' <i class="symbol symbol-loading"></i>';
+      deleteSiteConfig(path);
+    }
   });
 }
 

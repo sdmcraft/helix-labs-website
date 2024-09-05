@@ -131,10 +131,10 @@ function displaySiteDetails(path, name, elem, site = {
   const clone = elem.querySelector(`#${name}-clone`);
   clone.addEventListener('click', (e) => {
     e.preventDefault();
-    const contentSrc = elem.querySelector('input[name="content"]').value;
-    const codeSrc = elem.querySelector('input[name="code"]').value;
     const sitename = prompt('Enter name of new site (eg. site1)');
     if (sitename) {
+      const contentSrc = elem.querySelector('input[name="content"]').value;
+      const codeSrc = elem.querySelector('input[name="code"]').value;
       const newpath = `${path.substring(0, path.lastIndexOf('/'))}/${sitename}.json`;
       saveSiteConfig(newpath, site, codeSrc, contentSrc);
     }

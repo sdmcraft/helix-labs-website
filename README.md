@@ -1,9 +1,10 @@
-# Your Project's Title...
-Your project's description...
+# AEM Live Labs 
+
+This is https://labs.aem.live
 
 ## Environments
 - Preview: https://main--helix-labs-website--adobe.aem.page/
-- Live: https://main--helix-labs-website--adobe.hlx.live/
+- Live: https://main--helix-labs-website--adobe.aem.live/
 
 ## Installation
 

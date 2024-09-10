@@ -140,9 +140,12 @@ export default class ImportService {
       formData.append('customHeaders', customHeaders);
       formData.append('importScript', importScript);
 
+      const authHeaders = this.#getAuthHeaders();
+      delete authHeaders['Content-Type'];
+
       const resp = await fetch(`${this.endpoint}${IMPORT_JOBS_PATH}`, {
         method: 'POST',
-        headers: this.#getAuthHeaders(),
+        headers: authHeaders,
         body: formData,
       });
       if (resp.ok) {

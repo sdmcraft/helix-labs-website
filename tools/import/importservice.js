@@ -45,6 +45,11 @@ export default class ImportService {
     this.job = job;
   }
 
+  setEnvironment(env) {
+    this.config.endpoint = ['STAGE', 'PROD'].includes(env) ? env : 'PROD';
+    this.endpoint = endpoint[this.config.endpoint];
+  }
+
   async init() {
     if (!this.job.id) {
       const jobs = ImportService.getJobs();

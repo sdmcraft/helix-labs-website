@@ -50,7 +50,7 @@ function formatDuration(durationMs) {
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
-function createJobTable(job) {
+function createJobTable(job, env) {
   const table = document.createElement('table');
   const tbody = document.createElement('tbody');
 
@@ -91,6 +91,14 @@ function createJobTable(job) {
       tr.innerHTML = `<td>${key}</td><td>${formattedValue}</td>`;
       tbody.append(tr);
     });
+
+  // If the env was overridden, also show the environment.
+  if (env) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>Env</td><td>${env}</td>`;
+    tbody.append(tr);
+  }
+
   table.append(tbody);
   return table;
 }
@@ -141,6 +149,13 @@ function addJobsList(jobs) {
 
   const urlParams = new URLSearchParams(window.location.search);
   const searchJob = { id: urlParams.get('jobid') };
+
+  let envOverride = urlParams.get('env');
+  if (envOverride && envOverride !== 'PROD') {
+    service.setEnvironment(envOverride);
+  } else {
+    envOverride = undefined;
+  }
   service.setJob(searchJob);
   fields.apiKey.value = service.apiKey;
   service.init();
@@ -151,7 +166,7 @@ function addJobsList(jobs) {
     // Update job results
     clearResults();
     // build new results
-    resultsContainer.append(createJobTable(job));
+    resultsContainer.append(createJobTable(job, envOverride));
     if (job.downloadUrl) {
       const downloadLink = document.createElement('a');
       downloadLink.className = 'button accent';

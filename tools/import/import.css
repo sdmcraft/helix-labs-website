@@ -78,6 +78,10 @@
   cursor: pointer;
 }
 
+.import .invalid {
+  border-color: var(--red-800);
+}
+
 #results {
  padding-top: var(--spacing-s);
 }

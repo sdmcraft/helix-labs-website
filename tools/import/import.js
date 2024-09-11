@@ -50,7 +50,7 @@ function formatDuration(durationMs) {
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
-function createJobTable(job, env) {
+function createJobTable(job) {
   const table = document.createElement('table');
   const tbody = document.createElement('tbody');
 
@@ -62,7 +62,6 @@ function createJobTable(job, env) {
   Object.entries(job)
     .filter(([key]) => key !== 'downloadUrl')
     .forEach(([key, value]) => {
-      const tr = document.createElement('tr');
       let formattedValue = value;
       if (key === 'id') {
         const deepLink = new URL(window.location);
@@ -84,20 +83,16 @@ function createJobTable(job, env) {
       } else if (key === 'downloadUrl') {
         formattedValue = `<a class="button accent" href="${value}" download>Download</a>`;
       } else if (value === null) {
-        formattedValue = 'Error occurred while retrieving status or starting job.';
+        formattedValue = 'An error occurred while retrieving status or starting job.';
       } else if (typeof value === 'object') {
         formattedValue = Object.values(value).map((v) => `<p>${v}</p>`).join('');
       }
-      tr.innerHTML = `<td>${key}</td><td>${formattedValue}</td>`;
-      tbody.append(tr);
+      if (formattedValue) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${key}</td><td>${formattedValue}</td>`;
+        tbody.append(tr);
+      }
     });
-
-  // If the env was overridden, also show the environment.
-  if (env) {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>Env</td><td>${env}</td>`;
-    tbody.append(tr);
-  }
 
   table.append(tbody);
   return table;
@@ -166,7 +161,7 @@ function addJobsList(jobs) {
     // Update job results
     clearResults();
     // build new results
-    resultsContainer.append(createJobTable(job, envOverride));
+    resultsContainer.append(createJobTable({ ...job, env: envOverride }));
     if (job.downloadUrl) {
       const downloadLink = document.createElement('a');
       downloadLink.className = 'button accent';

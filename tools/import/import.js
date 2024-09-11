@@ -13,6 +13,7 @@ const fields = Object.freeze({
   startButton: document.querySelector('button#start-button'),
   scriptButton: document.querySelector('button#script-button'),
   clearButton: document.querySelector('a#clear-button'),
+  environmentLabel: document.querySelector('#environment'),
 });
 
 function clearResults() {
@@ -145,13 +146,18 @@ function addJobsList(jobs) {
   const urlParams = new URLSearchParams(window.location.search);
   const searchJob = { id: urlParams.get('jobid') };
 
+  // Allow for stage environment override via URL parameter.
+  // NOTE: This is for internal use only and should be abused (key will not work, previously run
+  //       jobs will not be found, etc.).
   let envOverride = urlParams.get('env') || '';
   envOverride = envOverride.toUpperCase();
-  if (envOverride && envOverride !== 'PROD') {
+  if (envOverride && envOverride === 'STAGE') {
     service.setEnvironment(envOverride);
+    fields.environmentLabel.textContent = envOverride;
   } else {
     envOverride = undefined;
   }
+
   service.setJob(searchJob);
   fields.apiKey.value = service.apiKey;
   service.init();

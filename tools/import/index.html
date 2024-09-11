@@ -15,7 +15,10 @@
 <header></header>
 <main class="import">
     <div>
-        <h1>Bulk Import</h1>
+        <div>
+            <h1>Bulk Import</h1>
+            <p id="environment"></p>
+        </div>
         <p>Perform bulk imports using your existing import scripts. <a href="https://www.aem.live/developer/importer" target="_blank">Learn more</a> about importing content.</p>
         <div>
             <form class="form">
@@ -36,7 +39,7 @@
                 </div>
                 <div class="field">
                     <label for="timeout-input">Page load timeout</label>
-                    <input id="timeout-input" type="number" value="100" min="0" step="100"></input>
+                    <input id="timeout-input" type="number" value="10000" min="0" step="1000"></input>
                 </div>
                 <div class="field">
                     <label>Options</label>

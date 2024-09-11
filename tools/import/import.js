@@ -145,7 +145,8 @@ function addJobsList(jobs) {
   const urlParams = new URLSearchParams(window.location.search);
   const searchJob = { id: urlParams.get('jobid') };
 
-  let envOverride = urlParams.get('env');
+  let envOverride = urlParams.get('env') || '';
+  envOverride = envOverride.toUpperCase();
   if (envOverride && envOverride !== 'PROD') {
     service.setEnvironment(envOverride);
   } else {

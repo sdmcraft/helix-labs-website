@@ -13,6 +13,7 @@ const fields = Object.freeze({
   startButton: document.querySelector('button#start-button'),
   scriptButton: document.querySelector('button#script-button'),
   clearButton: document.querySelector('a#clear-button'),
+  environmentLabel: document.querySelector('#environment'),
 });
 
 function clearResults() {
@@ -32,6 +33,9 @@ function formatDate(dateString) {
 }
 
 function formatDuration(durationMs) {
+  if (!durationMs) {
+    return 'N/A';
+  }
   const seconds = Math.floor((durationMs / 1000) % 60);
   const minutes = Math.floor((durationMs / (1000 * 60)) % 60);
   const hours = Math.floor((durationMs / (1000 * 60 * 60)) % 24);
@@ -59,7 +63,6 @@ function createJobTable(job) {
   Object.entries(job)
     .filter(([key]) => key !== 'downloadUrl')
     .forEach(([key, value]) => {
-      const tr = document.createElement('tr');
       let formattedValue = value;
       if (key === 'id') {
         const deepLink = new URL(window.location);
@@ -80,12 +83,18 @@ function createJobTable(job) {
         formattedValue = `<a href="${value}" target="_blank">${value}</a>`;
       } else if (key === 'downloadUrl') {
         formattedValue = `<a class="button accent" href="${value}" download>Download</a>`;
+      } else if (value === null) {
+        formattedValue = 'An error occurred while retrieving status or starting job.';
       } else if (typeof value === 'object') {
         formattedValue = Object.values(value).map((v) => `<p>${v}</p>`).join('');
       }
-      tr.innerHTML = `<td>${key}</td><td>${formattedValue}</td>`;
-      tbody.append(tr);
+      if (formattedValue) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${key}</td><td>${formattedValue}</td>`;
+        tbody.append(tr);
+      }
     });
+
   table.append(tbody);
   return table;
 }
@@ -99,26 +108,6 @@ function buildOptions(element) {
   });
 
   return values;
-}
-
-function getImportScript(input) {
-  return new Promise((resolve, reject) => {
-    const file = input.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const arrayBuffer = e.target.result;
-        const base64Content = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-        resolve(base64Content);
-      };
-      reader.onerror = (e) => {
-        reject(e);
-      };
-      reader.readAsArrayBuffer(file);
-    } else {
-      resolve('');
-    }
-  });
 }
 
 function addJobsList(jobs) {
@@ -156,6 +145,19 @@ function addJobsList(jobs) {
 
   const urlParams = new URLSearchParams(window.location.search);
   const searchJob = { id: urlParams.get('jobid') };
+
+  // Allow for stage environment override via URL parameter.
+  // NOTE: This is for internal use only and should be abused (key will not work, previously run
+  //       jobs will not be found, etc.).
+  let envOverride = urlParams.get('env') || '';
+  envOverride = envOverride.toUpperCase();
+  if (envOverride && envOverride === 'STAGE') {
+    service.setEnvironment(envOverride);
+    fields.environmentLabel.textContent = envOverride;
+  } else {
+    envOverride = undefined;
+  }
+
   service.setJob(searchJob);
   fields.apiKey.value = service.apiKey;
   service.init();
@@ -166,7 +168,7 @@ function addJobsList(jobs) {
     // Update job results
     clearResults();
     // build new results
-    resultsContainer.append(createJobTable(job));
+    resultsContainer.append(createJobTable({ ...job, env: envOverride }));
     if (job.downloadUrl) {
       const downloadLink = document.createElement('a');
       downloadLink.className = 'button accent';
@@ -188,6 +190,10 @@ function addJobsList(jobs) {
     service.init();
   });
 
+  fields.headers.addEventListener('keyup', () => {
+    fields.headers.classList.remove('invalid');
+  });
+
   fields.startButton.addEventListener('click', async () => {
     clearResults();
     const msg = document.createElement('h5');
@@ -196,25 +202,36 @@ function addJobsList(jobs) {
     resultsContainer.closest('.job-details').classList.remove('hidden');
 
     const urlsArray = fields.urls.value.split('\n').reverse().filter((u) => u.trim() !== '');
-    let customHeaders = {};
-    try {
-      customHeaders = JSON.parse(fields.headers.value);
-    } catch (e) {
-      /* eslint-disable no-console */
-      console.warn('Invalid headers JSON');
+    let customHeaders = '';
+    if (fields.headers.value.trim() !== '') {
+      try {
+        // Validate that headers are in valid JSON format.
+        JSON.parse(fields.headers.value.trim());
+        customHeaders = fields.headers.value.trim();
+      } catch (e) {
+        /* eslint-disable no-console */
+        console.warn('Invalid headers JSON', e);
+        fields.headers.classList.add('invalid');
+        return;
+      }
     }
     const options = {
       ...buildOptions(form),
       pageLoadTimeout: parseInt(fields.timeout.value || '100', 10),
-      customHeaders,
     };
-    const importScript = await getImportScript(fields.importScript);
-    const newJob = await service.startJob({ urls: urlsArray, options, importScript });
+    const importScript = fields.importScript.files[0] ?? undefined;
+    const newJob = await service.startJob({
+      urls: urlsArray, options, customHeaders, importScript,
+    });
 
-    const url = new URL(window.location);
-    url.searchParams.set('jobid', newJob.id);
-    window.history.pushState({}, '', url);
-    resultsContainer.closest('.job-details').scrollIntoView({ behavior: 'smooth' });
+    // If job was created successfully, set the environment with its info.
+    if (newJob.id) {
+      const url = new URL(window.location);
+      url.searchParams.set('jobid', newJob.id);
+      window.history.pushState({}, '', url);
+      resultsContainer.closest('.job-details')
+        .scrollIntoView({ behavior: 'smooth' });
+    }
   });
 
   fields.clearButton.addEventListener('click', (event) => {

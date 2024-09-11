@@ -2,6 +2,24 @@
   font-size: var(--font-size-50);
 }
 
+.import > .section > div:first-child > div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.import #environment {
+  background-color: var(--celery-400);
+  border-radius: 14px;
+  padding: 8px;
+  height: 2.5rem;
+  margin-top: -3rem;
+  opacity: 0.7;
+}
+
+.import #environment:empty {
+  display: none;
+}
+
 .import .form .field {
   margin-bottom: var(--spacing-400);
 }
@@ -76,6 +94,10 @@
 .import .heading a {
   font-size: var(--body-size-xs);
   cursor: pointer;
+}
+
+.import .invalid {
+  border-color: var(--red-800);
 }
 
 #results {

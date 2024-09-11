@@ -45,6 +45,11 @@ export default class ImportService {
     this.job = job;
   }
 
+  setEnvironment(env) {
+    this.config.endpoint = ['STAGE', 'PROD'].includes(env) ? env : 'PROD';
+    this.endpoint = endpoint[this.config.endpoint];
+  }
+
   async init() {
     if (!this.job.id) {
       const jobs = ImportService.getJobs();
@@ -118,16 +123,35 @@ export default class ImportService {
     localStorage.setItem(STORAGE_JOBS, JSON.stringify([]));
   }
 
-  async startJob({ urls = [], options = {}, importScript }) {
+  /**
+   * Start a bulk importer job.
+   * @param urls An array of URLs to import.
+   * @param options The options to use during the import.
+   * @param customHeaders A string, in JSON object format, specifying the headers to use during
+   *                      the import.
+   * @param importScript The import script to upload and use for the import.
+   * @returns {Promise<*|{}>}
+   */
+  async startJob({
+    urls = [], options = {}, customHeaders = '', importScript,
+  }) {
     if (!this.apiKey) {
       throw new Error('API key is required');
     }
-    const body = importScript ? { urls, options, importScript } : { urls, options };
     try {
+      const formData = new FormData();
+      formData.append('urls', JSON.stringify(urls));
+      formData.append('options', JSON.stringify(options));
+      formData.append('customHeaders', customHeaders);
+      formData.append('importScript', importScript);
+
+      const authHeaders = this.#getAuthHeaders();
+      delete authHeaders['Content-Type'];
+
       const resp = await fetch(`${this.endpoint}${IMPORT_JOBS_PATH}`, {
         method: 'POST',
-        headers: this.#getAuthHeaders(),
-        body: JSON.stringify(body),
+        headers: authHeaders,
+        body: formData,
       });
       if (resp.ok) {
         this.job = await resp.json();

@@ -104,7 +104,7 @@ const renderDetails = (data) => {
   const pushInvalPill = pushInval === 'enabled'
     ? '<span class="pill badge good">enabled</span>'
     : '<span class="pill badge bad">disabled</span>';
-  const actualCdn = data.cdn.actualCDNType;;
+  const actualCdn = data.cdn.actualCDNType;
   const cdnMatchClass = actualCdn === byoCdnType ? 'good' : 'bad';
 
   // TODO: render configured prod cdn type, if available (data.config.type)

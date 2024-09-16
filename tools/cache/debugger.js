@@ -12,6 +12,7 @@ const ENV_HEADERS = {
   CDN: {
     'Content Length': 'content-length',
     'Last Modified': 'last-modified',
+    ETag: 'etag',
     'Cache Keys': ['surrogate-key', 'edge-cache-tag', 'cache-tag'],
   },
   Live: {
@@ -19,13 +20,15 @@ const ENV_HEADERS = {
     'Effective Cache Control': ['cdn-cache-control', 'edge-control', 'surrogate-control', 'cache-control'],
     'Content Length': 'content-length',
     'Last Modified': 'last-modified',
-    'Cache Keys': ['surrogate-key', 'cache-tag'],
+    ETag: 'etag',
+    'Cache Keys': ['surrogate-key', 'cache-tag', 'x-surogate-key'],
   },
   Preview: {
     Stack: ['via'],
     'Content Length': 'content-length',
     'Last Modified': 'last-modified',
-    'Cache Keys': ['surrogate-key', 'cache-tag'],
+    ETag: 'etag',
+    'Cache Keys': ['surrogate-key', 'cache-tag', 'x-surogate-key'],
   },
 };
 

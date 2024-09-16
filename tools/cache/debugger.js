@@ -146,10 +146,10 @@ const renderDetails = (data) => {
       ${configuredCdnHost ? `<div class="row">
         <span class="key">Configured CDN Host</span>
         <span class="val">${configuredCdnHost}</span>
+      </div>
       <div class="row">
         <span class="key">Forwarded Host</span>
         <span class="val">${forwardedHost}</span>
-      </div>
       </div>` : ''}
     </div>
   `;

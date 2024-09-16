@@ -15,14 +15,14 @@ const ENV_HEADERS = {
     'Cache Keys': ['surrogate-key', 'edge-cache-tag', 'cache-tag'],
   },
   Live: {
-    'Stack': ['via'],
+    Stack: ['via'],
     'Effective Cache Control': ['cdn-cache-control', 'edge-control', 'surrogate-control', 'cache-control'],
     'Content Length': 'content-length',
     'Last Modified': 'last-modified',
     'Cache Keys': ['surrogate-key', 'cache-tag'],
   },
   Preview: {
-    'Stack': ['via'],
+    Stack: ['via'],
     'Content Length': 'content-length',
     'Last Modified': 'last-modified',
     'Cache Keys': ['surrogate-key', 'cache-tag'],

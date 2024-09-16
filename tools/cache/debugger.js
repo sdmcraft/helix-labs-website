@@ -15,12 +15,15 @@ const ENV_HEADERS = {
     'Cache Keys': ['surrogate-key', 'edge-cache-tag', 'cache-tag'],
   },
   Live: {
-    'Effective Cache Control': ['cdn-cache-control', 's-maxage', 'surrogate-control', 'cache-control'],
+    'Stack': ['via'],
+    'Effective Cache Control': ['cdn-cache-control', 'edge-control', 'surrogate-control', 'cache-control'],
     'Content Length': 'content-length',
     'Last Modified': 'last-modified',
     'Cache Keys': ['surrogate-key', 'cache-tag'],
   },
   Preview: {
+    'Stack': ['via'],
+    'Content Length': 'content-length',
     'Last Modified': 'last-modified',
     'Cache Keys': ['surrogate-key', 'cache-tag'],
   },
@@ -68,7 +71,16 @@ const tileTemplate = (
     let valCls = '';
     let val = '';
     while (!val && valKeys.length) {
-      val = headers[valKeys.shift()];
+      const vk = valKeys.shift();
+      val = headers[vk];
+      // FIXME: this is a hack to handle the effective cache control
+      if (key === 'Effective Cache Control' && val) {
+        val = `${vk}: ${val}`;
+      }
+      // FIXME: this is a hack to infer the stack based on the via header
+      if (key === 'Stack') {
+        val = val?.toLowerCase().includes('varnish') ? 'fastly' : 'cloudflare';
+      }
     }
     if (key === 'Cache Keys' && val) {
       // split keys into pills
@@ -101,14 +113,13 @@ const renderDetails = (data) => {
     x_byo_cdn_type: byoCdnType = 'unknown',
     x_forwarded_host: forwardedHost = '',
   } = data.probe.req.headers;
+  const configuredCdnType = data.config?.type;
+  const configuredCdnHost = data.config?.host;
   const pushInvalPill = pushInval === 'enabled'
     ? '<span class="pill badge good">enabled</span>'
     : '<span class="pill badge bad">disabled</span>';
   const actualCdn = data.cdn.actualCDNType;
   const cdnMatchClass = actualCdn === byoCdnType ? 'good' : 'bad';
-
-  // TODO: render configured prod cdn type, if available (data.config.type)
-  // TODO: render configured prod cdn host, if available (data.config.host)
 
   // TODO: render status information if available (similar to POP?)
 
@@ -132,6 +143,14 @@ const renderDetails = (data) => {
         <span class="key">Forwarded Host</span>
         <span class="val">${forwardedHost}</span>
       </div>
+      ${configuredCdnType ? `<div class="row">
+        <span class="key">Configured CDN Type</span>
+        <span class="val"><span class="pill badge ${actualCdn === configuredCdnType ? 'good' : 'bad'}">${configuredCdnType}</span></span>
+      </div>` : ''}
+      ${configuredCdnHost ? `<div class="row">
+        <span class="key">Configured CDN Host</span>
+        <span class="val">${configuredCdnHost}</span>
+      </div>` : ''}
     </div>
   `;
 

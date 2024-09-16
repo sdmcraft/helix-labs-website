@@ -29,29 +29,6 @@ const ENV_HEADERS = {
 const fetchDetails = (url) => fetch(`${API}?url=${encodeURIComponent(url)}`);
 
 /**
- * Infer CDN type from headers.
- * Worker runs on CF so that is the fallback type. Everything "looks like" CF.
- * @param {any} data
- * @returns
- */
-const inferCDNType = (data) => {
-  const {
-    cdn: { headers: cdnResHeaders },
-    probe: { req: { headers: probeReqHeaders } },
-  } = data;
-  if (cdnResHeaders['x-amz-cf-id']) {
-    return 'cloudfront';
-  }
-  if ((probeReqHeaders.via ?? '').includes('akamai')) {
-    return 'akamai';
-  }
-  if (cdnResHeaders['fastly-debug-ttl'] || cdnResHeaders['fastly-debug-digest'] || cdnResHeaders['fastly-debug-path']) {
-    return 'fastly';
-  }
-  return 'cloudflare';
-};
-
-/**
  * @param {import('./types.js').POP[]} pops
  * @param {'fastly'|'cloudflare'} type
  */
@@ -127,8 +104,13 @@ const renderDetails = (data) => {
   const pushInvalPill = pushInval === 'enabled'
     ? '<span class="pill badge good">enabled</span>'
     : '<span class="pill badge bad">disabled</span>';
-  const actualCdn = inferCDNType(data);
+  const actualCdn = data.cdn.actualCDNType;
   const cdnMatchClass = actualCdn === byoCdnType ? 'good' : 'bad';
+
+  // TODO: render configured prod cdn type, if available (data.config.type)
+  // TODO: render configured prod cdn host, if available (data.config.host)
+
+  // TODO: render status information if available (similar to POP?)
 
   // add settings section
   resultsContainer.innerHTML = /* html */`

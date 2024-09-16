@@ -139,10 +139,6 @@ const renderDetails = (data) => {
         <span class="key">Actual CDN Type</span>
         <span class="val"><span class="pill badge ${cdnMatchClass}">${actualCdn}</span></span>
       </div>
-      <div class="row">
-        <span class="key">Forwarded Host</span>
-        <span class="val">${forwardedHost}</span>
-      </div>
       ${configuredCdnType ? `<div class="row">
         <span class="key">Configured CDN Type</span>
         <span class="val"><span class="pill badge ${actualCdn === configuredCdnType ? 'good' : 'bad'}">${configuredCdnType}</span></span>
@@ -150,6 +146,10 @@ const renderDetails = (data) => {
       ${configuredCdnHost ? `<div class="row">
         <span class="key">Configured CDN Host</span>
         <span class="val">${configuredCdnHost}</span>
+      <div class="row">
+        <span class="key">Forwarded Host</span>
+        <span class="val">${forwardedHost}</span>
+      </div>
       </div>` : ''}
     </div>
   `;

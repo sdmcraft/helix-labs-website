@@ -98,11 +98,11 @@ const tileTemplate = (
     ) {
       valCls = 'bad';
     }
-    return /* html */`
+    return val ? /* html */`
       <div class="row">
         <span class="key">${key}</span>
         <span class="val ${valCls}">${val}</span>
-      </div>`;
+      </div>` : '';
   }).join('\n')}
     ${pops ? popsTemplate(pops, 'fastly') : ''}
     </div>
@@ -144,16 +144,20 @@ const renderDetails = (data) => {
       </div>
       ${configuredCdnType ? `<div class="row">
         <span class="key">Configured CDN Type</span>
-        <span class="val"><span class="pill badge ${actualCdn === configuredCdnType ? 'good' : 'bad'}">${configuredCdnType}</span></span>
+        <span class="val"><span class="pill badge ${actualCdn === configuredCdnType || (configuredCdnType === 'managed' && actualCdn === 'fastly') ? 'good' : 'bad'}">${configuredCdnType}</span></span>
       </div>` : ''}
       ${configuredCdnHost ? `<div class="row">
         <span class="key">Configured CDN Host</span>
         <span class="val">${configuredCdnHost}</span>
-      </div>
+      </div>` : ''}
       <div class="row">
         <span class="key">Forwarded Host</span>
         <span class="val">${forwardedHost}</span>
-      </div>` : ''}
+      </div>
+      <div class="row">
+        <span class="key">Random Probe ID</span>
+        <span class="val">${data.probe.randomId}</span>
+      </div>
     </div>
   `;
 
@@ -211,7 +215,7 @@ const renderDetails = (data) => {
       clearInterval(interval);
 
       if (!response.ok) {
-        resultsContainer.innerHTML = '<p class="error">Failed to fetch details</p>';
+        resultsContainer.innerHTML = `<p class="error">Failed to fetch details: ${await response.text()}</p>`;
         return;
       }
       const data = await response.json();

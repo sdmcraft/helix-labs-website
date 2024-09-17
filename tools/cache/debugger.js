@@ -98,11 +98,11 @@ const tileTemplate = (
     ) {
       valCls = 'bad';
     }
-    return /* html */`
+    return val ? /* html */`
       <div class="row">
         <span class="key">${key}</span>
         <span class="val ${valCls}">${val}</span>
-      </div>`;
+      </div>` : '';
   }).join('\n')}
     ${pops ? popsTemplate(pops, 'fastly') : ''}
     </div>

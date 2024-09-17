@@ -144,7 +144,7 @@ const renderDetails = (data) => {
       </div>
       ${configuredCdnType ? `<div class="row">
         <span class="key">Configured CDN Type</span>
-        <span class="val"><span class="pill badge ${actualCdn === configuredCdnType ? 'good' : 'bad'}">${configuredCdnType}</span></span>
+        <span class="val"><span class="pill badge ${actualCdn === configuredCdnType || (configuredCdnType === 'managed' && actualCdn === 'fastly') ? 'good' : 'bad'}">${configuredCdnType}</span></span>
       </div>` : ''}
       ${configuredCdnHost ? `<div class="row">
         <span class="key">Configured CDN Host</span>

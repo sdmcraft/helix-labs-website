@@ -209,7 +209,7 @@ const renderDetails = (data) => {
       const interval = setInterval(() => {
         // eslint-disable-next-line no-plusplus
         if (++count > 3) count = 0;
-        resultsContainer.innerHTML = `<div class="spinner">Loading${'.'.repeat(count)}</div>`;
+        resultsContainer.innerHTML = `<div class="spinner">Searching logs${'.'.repeat(count)}</div>`;
       }, 250);
       const response = await fetchDetails(url);
       clearInterval(interval);

@@ -13,7 +13,7 @@ const ENV_HEADERS = {
     'Content Length': 'content-length',
     'Last Modified': 'last-modified',
     ETag: 'etag',
-    'Cache Keys': ['surrogate-key', 'edge-cache-tag', 'cache-tag'],
+    'Cache Keys': ['edge-cache-tag', 'cache-tag', 'surrogate-key'],
   },
   Live: {
     Stack: ['via'],

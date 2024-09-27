@@ -91,7 +91,8 @@ const tileTemplate = (
         .split(/[,\s+]/)
         .filter((k) => k.length)
         .sort((a, b) => a.length - b.length)
-        .map((k) => `<span class="pill">${k}</span>`).join(' ');
+        .map((k) => `<span class="pill">${k}</span>`)
+        .join(' ');
       valCls = 'list';
     }
     if ((key === 'Content Length' && !contentLengthMatches && env !== 'Preview')

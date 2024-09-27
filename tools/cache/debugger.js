@@ -89,6 +89,7 @@ const tileTemplate = (
       // split keys into pills
       val = val
         .split(/[,\s+]/)
+        .filter((k) => k.length)
         .sort((a, b) => a.length - b.length)
         .map((k) => `<span class="pill">${k}</span>`).join(' ');
       valCls = 'list';

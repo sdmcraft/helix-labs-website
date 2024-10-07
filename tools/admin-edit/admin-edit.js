@@ -1,4 +1,5 @@
 import { decorateIcons } from '../../scripts/aem.js';
+import { swapIcons } from '../../scripts/scripts.js';
 
 const adminForm = document.getElementById('admin-form');
 const adminURL = document.getElementById('admin-url');
@@ -95,8 +96,9 @@ addHeaderButton.addEventListener('click', () => {
     <input type="text" class="header-value" placeholder="Header value" required>
     <button type="button" class="remove-header"><span class="icon icon-trash-delete-bin"></span></button>
   `;
-  decorateIcons(header);
   headersContainer.append(header);
+  decorateIcons(header);
+  swapIcons();
   header.querySelector('.remove-header').addEventListener('click', () => header.remove());
 });
 

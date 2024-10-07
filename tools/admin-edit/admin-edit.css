@@ -21,6 +21,11 @@
   flex-direction: row;
 }
 
+.admin-edit #headers-container button {
+  flex: 0 0 44px;
+  cursor: pointer;
+}
+
 @media (width >= 720px) {
   .admin-edit #admin-form {
     grid-template-columns: 1fr max-content;

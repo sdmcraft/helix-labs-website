@@ -1,4 +1,4 @@
-import { decorateIcons } from "../../scripts/aem.js";
+import { decorateIcons } from '../../scripts/aem.js';
 
 const adminForm = document.getElementById('admin-form');
 const adminURL = document.getElementById('admin-url');
@@ -39,18 +39,16 @@ function getHeaders() {
   const headers = {};
   headersContainer.querySelectorAll('.header').forEach((header) => {
     const name = header.querySelector('.header-name').value;
-    const value = header.querySelector('.header-value').value;
+    const { value } = header.querySelector('.header-value');
     if (name && value) headers[name] = value;
   });
   return headers;
 }
 
-
 headersContainer?.querySelector('#auth-token-header button')?.addEventListener('click', (evt) => {
   evt.preventDefault();
   evt.target.closest('.header').remove();
 });
-
 
 // toggles the request method dropdown
 reqMethod.addEventListener('click', () => {

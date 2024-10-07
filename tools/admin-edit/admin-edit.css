@@ -21,7 +21,7 @@
   flex-direction: row;
 }
 
-@media (width >=720px) {
+@media (width >= 720px) {
   .admin-edit #admin-form {
     grid-template-columns: 1fr max-content;
   }
